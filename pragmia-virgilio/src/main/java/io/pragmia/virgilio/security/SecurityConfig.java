@@ -17,7 +17,7 @@ public class SecurityConfig {
 
     private static final String[] PUBLIC_PATHS = {
         "/login", "/login/**", "/oauth2/**", "/.well-known/**",
-        "/actuator/health", "/swagger-ui/**", "/api-docs/**",
+        "/actuator/health", "/swagger-ui/**", "/v3/api-docs/**",
         "/error", "/static/**", "/favicon.ico", "/webjars/**"
     };
 
@@ -36,19 +36,14 @@ public class SecurityConfig {
         http.authorizeHttpRequests(a -> a
                 .requestMatchers(PUBLIC_PATHS).permitAll()
                 .anyRequest().authenticated())
-            .formLogin(f -> f
-                .loginPage("/login")
-                .loginProcessingUrl("/login")
-                .defaultSuccessUrl("/", true)
-                .failureUrl("/login?error=true")
-                .permitAll())
+            // Nessun formLogin: il POST /login è gestito da LoginController + FlowEngine
             .logout(l -> l
                 .logoutUrl("/logout")
                 .logoutSuccessUrl("/login?logout=true")
                 .invalidateHttpSession(true)
                 .deleteCookies("SESSION", "JSESSIONID")
                 .permitAll())
-            .csrf(c -> c.ignoringRequestMatchers("/api/**"));
+            .csrf(c -> c.ignoringRequestMatchers("/api/**", "/login"));
         return http.build();
     }
 
