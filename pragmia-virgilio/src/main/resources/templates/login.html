@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PRAGMIA — Login</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+  <style>
+    body { background: #0d1117; color: #e6edf3; }
+    .card { background: #161b22; border: 1px solid #30363d; }
+    .brand { font-size: 1.5rem; font-weight: 700; letter-spacing: .05em; }
+    .brand span { color: #58a6ff; }
+    input.form-control { background: #0d1117; border-color: #30363d; color: #e6edf3; }
+    input.form-control:focus { background: #0d1117; border-color: #58a6ff; color: #e6edf3; box-shadow: none; }
+    .btn-primary { background: #238636; border-color: #238636; }
+    .btn-primary:hover { background: #2ea043; border-color: #2ea043; }
+    .subtitle { color: #8b949e; font-size: .8rem; }
+  </style>
+</head>
+<body class="d-flex align-items-center justify-content-center min-vh-100">
+  <div class="card p-4 shadow" style="width:380px">
+    <div class="text-center mb-4">
+      <div class="brand"><span>PRAGMIA</span></div>
+      <div class="subtitle">Perché ogni accesso racconta una storia</div>
+    </div>
+
+    <div th:if="${errorMsg}" class="alert alert-danger py-2 small" th:text="${errorMsg}"></div>
+    <div th:if="${logoutMsg}" class="alert alert-success py-2 small" th:text="${logoutMsg}"></div>
+
+    <form th:action="@{/login}" method="post">
+      <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+
+      <div class="mb-3">
+        <label class="form-label small">Username</label>
+        <input type="text" name="username" class="form-control" autocomplete="username"
+               th:value="${username}" required autofocus>
+      </div>
+      <div class="mb-3">
+        <label class="form-label small">Password</label>
+        <input type="password" name="password" class="form-control" autocomplete="current-password" required>
+      </div>
+      <div class="mb-3" th:if="${pendingMfa}">
+        <label class="form-label small">Codice TOTP (Authenticator)</label>
+        <input type="text" name="totpCode" class="form-control" maxlength="6"
+               pattern="[0-9]{6}" placeholder="000000" autofocus>
+      </div>
+
+      <button type="submit" class="btn btn-primary w-100">Accedi</button>
+    </form>
+  </div>
+</body>
+</html>
