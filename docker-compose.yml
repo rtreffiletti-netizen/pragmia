@@ -1,36 +1,37 @@
-version: "3.9"
+version: '3.9'
+
 services:
   postgres:
     image: postgres:16-alpine
     container_name: pragmia-postgres
-    ports: ["5432:5432"]
     environment:
-      POSTGRES_DB: pragmia
-      POSTGRES_USER: pragmia
+      POSTGRES_DB:       pragmia
+      POSTGRES_USER:     pragmia
       POSTGRES_PASSWORD: pragmia_secret
-    volumes: [postgres-data:/var/lib/postgresql/data]
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL","pg_isready -U pragmia"]
-      interval: 10s
+      test: ["CMD-SHELL", "pg_isready -U pragmia"]
+      interval: 5s
       timeout: 5s
       retries: 5
+
   redis:
     image: redis:7-alpine
     container_name: pragmia-redis
-    ports: ["6379:6379"]
-    command: redis-server --requirepass redis_secret --appendonly yes
-    volumes: [redis-data:/data]
+    command: redis-server --requirepass redis_secret
+    ports:
+      - "6379:6379"
+    volumes:
+      - redisdata:/data
     healthcheck:
-      test: ["CMD","redis-cli","--pass","redis_secret","ping"]
-      interval: 10s
+      test: ["CMD", "redis-cli", "-a", "redis_secret", "ping"]
+      interval: 5s
       timeout: 5s
       retries: 5
-  ollama:
-    image: ollama/ollama:latest
-    container_name: pragmia-ollama
-    ports: ["11434:11434"]
-    volumes: [ollama-models:/root/.ollama]
+
 volumes:
-  postgres-data:
-  redis-data:
-  ollama-models:
+  pgdata:
+  redisdata:
