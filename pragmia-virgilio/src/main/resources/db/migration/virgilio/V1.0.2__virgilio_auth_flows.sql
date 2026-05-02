@@ -11,6 +11,6 @@ CREATE TABLE IF NOT EXISTS pragmia_virgilio_auth_flows (
 INSERT INTO pragmia_virgilio_auth_flows (name, flow_definition, is_active)
 VALUES (
     'Default Login Flow',
-    '{"id": "default-login-flow", "name": "Default Login Flow", "version": "1.0", "startNodeId": "start", "nodes": [{"id": "start", "type": "USERNAME_PASSWORD", "name": "Login", "config": {}, "transitions": {"SUCCESS": "allow", "FAILURE": "deny"}}, {"id": "allow", "type": "ALLOW", "name": "Accesso consentito", "config": {}, "transitions": {}}, {"id": "deny", "type": "DENY", "name": "Accesso negato", "config": {"reason": "Credenziali non valide"}, "transitions": {}}]}',
+    '{"id": "default-login-flow", "name": "Default Login Flow", "version": "1.0", "startNodeId": "start", "nodes": [{"id": "start_node", "type": "START", "data": {}}, {"id": "auth_node", "type": "USERNAME_PASSWORD", "data": {}}, {"id": "allow_node", "type": "ALLOW", "data": {}}, {"id": "deny_node", "type": "DENY", "data": {}}], "edges": [{"source": "start_node", "sourceHandle": "", "target": "auth_node"}, {"source": "auth_node", "sourceHandle": "success", "target": "allow_node"}, {"source": "auth_node", "sourceHandle": "failure", "target": "deny_node"}]}',
     true
 ) ON CONFLICT DO NOTHING;
