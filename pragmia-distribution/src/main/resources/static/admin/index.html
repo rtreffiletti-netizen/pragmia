@@ -6,532 +6,441 @@
 <title>PRAGMIA — Admin Console</title>
 <style>
   :root {
-    --bg: #0f1117;
-    --sidebar: #161b27;
-    --card: #1e2535;
-    --border: #2a3347;
-    --accent: #4f8ef7;
-    --accent2: #7c5cbf;
-    --green: #22c55e;
-    --red: #ef4444;
-    --yellow: #f59e0b;
-    --text: #e2e8f0;
-    --muted: #64748b;
-    --font: 'Inter', system-ui, sans-serif;
+    --bg:#0f1117;--sidebar:#161b27;--card:#1e2535;--border:#2a3347;
+    --accent:#4f8ef7;--accent2:#7c5cbf;--green:#22c55e;--red:#ef4444;
+    --yellow:#f59e0b;--text:#e2e8f0;--muted:#64748b;
   }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { background: var(--bg); color: var(--text); font-family: var(--font); display: flex; height: 100vh; overflow: hidden; }
-
-  /* SIDEBAR */
-  .sidebar { width: 240px; background: var(--sidebar); border-right: 1px solid var(--border);
-             display: flex; flex-direction: column; flex-shrink: 0; }
-  .logo { padding: 24px 20px 16px; border-bottom: 1px solid var(--border); }
-  .logo h1 { font-size: 20px; font-weight: 800; letter-spacing: 2px; color: var(--accent); }
-  .logo p  { font-size: 10px; color: var(--muted); margin-top: 2px; letter-spacing: 1px; }
-  .nav { flex: 1; padding: 12px 0; overflow-y: auto; }
-  .nav-section { font-size: 10px; color: var(--muted); padding: 12px 20px 4px; letter-spacing: 1px; text-transform: uppercase; }
-  .nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 20px; cursor: pointer;
-              font-size: 13px; color: var(--muted); border-left: 3px solid transparent; transition: all .15s; }
-  .nav-item:hover { color: var(--text); background: rgba(79,142,247,.08); }
-  .nav-item.active { color: var(--accent); background: rgba(79,142,247,.12); border-left-color: var(--accent); }
-  .nav-item .icon { font-size: 16px; width: 20px; text-align: center; }
-  .sidebar-footer { padding: 16px 20px; border-top: 1px solid var(--border); }
-  .user-badge { display: flex; align-items: center; gap: 10px; }
-  .avatar { width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg,var(--accent),var(--accent2));
-             display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; }
-  .user-info .name { font-size: 13px; font-weight: 600; }
-  .user-info .role { font-size: 11px; color: var(--muted); }
-
-  /* MAIN */
-  .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
-  .topbar { height: 56px; background: var(--sidebar); border-bottom: 1px solid var(--border);
-            display: flex; align-items: center; justify-content: space-between; padding: 0 24px; flex-shrink: 0; }
-  .topbar-title { font-size: 15px; font-weight: 600; }
-  .topbar-right { display: flex; align-items: center; gap: 12px; }
-  .badge { font-size: 11px; padding: 3px 10px; border-radius: 20px; font-weight: 600; }
-  .badge.green { background: rgba(34,197,94,.15); color: var(--green); }
-  .badge.blue  { background: rgba(79,142,247,.15); color: var(--accent); }
-  .btn { padding: 7px 16px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer;
-          border: none; transition: all .15s; }
-  .btn-primary { background: var(--accent); color: #fff; }
-  .btn-primary:hover { background: #3b7de8; }
-  .btn-ghost { background: transparent; color: var(--muted); border: 1px solid var(--border); }
-  .btn-ghost:hover { color: var(--text); border-color: var(--text); }
-
-  .content { flex: 1; overflow-y: auto; padding: 24px; }
-
-  /* CARDS */
-  .grid-4 { display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; margin-bottom: 24px; }
-  .grid-2 { display: grid; grid-template-columns: repeat(2,1fr); gap: 16px; margin-bottom: 24px; }
-  .card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 20px; }
-  .card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px; }
-  .card-title { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .8px; }
-  .card-icon { font-size: 20px; }
-  .stat-value { font-size: 28px; font-weight: 700; }
-  .stat-delta { font-size: 12px; margin-top: 4px; }
-  .delta-up   { color: var(--green); }
-  .delta-down { color: var(--red); }
-
-  /* TABLE */
-  table { width: 100%; border-collapse: collapse; font-size: 13px; }
-  th { text-align: left; padding: 10px 14px; font-size: 11px; color: var(--muted);
-       text-transform: uppercase; letter-spacing: .7px; border-bottom: 1px solid var(--border); }
-  td { padding: 12px 14px; border-bottom: 1px solid rgba(42,51,71,.6); }
-  tr:last-child td { border-bottom: none; }
-  tr:hover td { background: rgba(79,142,247,.04); }
-
-  .status-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 6px; }
-  .dot-green  { background: var(--green); box-shadow: 0 0 6px var(--green); }
-  .dot-red    { background: var(--red); }
-  .dot-yellow { background: var(--yellow); }
-
-  .tag { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 4px; font-weight: 600; }
-  .tag-blue   { background: rgba(79,142,247,.15); color: var(--accent); }
-  .tag-green  { background: rgba(34,197,94,.15); color: var(--green); }
-  .tag-red    { background: rgba(239,68,68,.15); color: var(--red); }
-  .tag-yellow { background: rgba(245,158,11,.15); color: var(--yellow); }
-  .tag-purple { background: rgba(124,92,191,.15); color: #a78bfa; }
-
-  /* COMPLIANCE BARS */
-  .compliance-item { margin-bottom: 16px; }
-  .compliance-header { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 6px; }
-  .progress-bar { height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
-  .progress-fill { height: 100%; border-radius: 3px; transition: width .6s ease; }
-
-  /* AUDIT FEED */
-  .feed-item { display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid rgba(42,51,71,.5); }
-  .feed-item:last-child { border-bottom: none; }
-  .feed-dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 5px; flex-shrink: 0; }
-  .feed-body { flex: 1; }
-  .feed-event { font-size: 13px; }
-  .feed-meta  { font-size: 11px; color: var(--muted); margin-top: 2px; }
-
-  /* HIDDEN PANELS */
-  .panel { display: none; }
-  .panel.active { display: block; }
-
-  /* FLOW TREE VISUAL */
-  .flow-canvas { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 20px;
-                 display: flex; flex-direction: column; align-items: center; gap: 0; min-height: 320px; }
-  .flow-node { background: var(--card); border: 1px solid var(--border); border-radius: 8px;
-               padding: 10px 24px; font-size: 13px; font-weight: 600; min-width: 160px; text-align: center; position: relative; }
-  .flow-node.start   { border-color: var(--accent); color: var(--accent); }
-  .flow-node.action  { border-color: var(--border); }
-  .flow-node.success { border-color: var(--green); color: var(--green); }
-  .flow-node.fail    { border-color: var(--red); color: var(--red); }
-  .flow-arrow { display: flex; flex-direction: column; align-items: center; gap: 0; }
-  .flow-line  { width: 2px; height: 24px; background: var(--border); }
-  .flow-split { display: flex; gap: 32px; align-items: flex-start; }
-  .flow-branch { display: flex; flex-direction: column; align-items: center; gap: 0; }
-  .flow-label { font-size: 10px; color: var(--muted); padding: 2px 0; }
-
-  /* SCROLLBAR */
-  ::-webkit-scrollbar { width: 5px; }
-  ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;display:flex;height:100vh;overflow:hidden}
+  .sidebar{width:220px;background:var(--sidebar);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0}
+  .logo{padding:22px 18px 14px;border-bottom:1px solid var(--border)}
+  .logo h1{font-size:19px;font-weight:800;letter-spacing:2px;color:var(--accent)}
+  .logo p{font-size:10px;color:var(--muted);margin-top:2px;letter-spacing:1px}
+  .nav{flex:1;padding:10px 0;overflow-y:auto}
+  .nav-section{font-size:10px;color:var(--muted);padding:10px 18px 4px;letter-spacing:1px;text-transform:uppercase}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:8px 18px;cursor:pointer;font-size:13px;color:var(--muted);border-left:3px solid transparent;transition:all .15s}
+  .nav-item:hover{color:var(--text);background:rgba(79,142,247,.08)}
+  .nav-item.active{color:var(--accent);background:rgba(79,142,247,.12);border-left-color:var(--accent)}
+  .sidebar-footer{padding:14px 18px;border-top:1px solid var(--border)}
+  .user-badge{display:flex;align-items:center;gap:10px}
+  .avatar{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700}
+  .user-info .name{font-size:12px;font-weight:600}
+  .user-info .role{font-size:10px;color:var(--muted)}
+  .main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+  .topbar{height:52px;background:var(--sidebar);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 22px;flex-shrink:0}
+  .topbar-title{font-size:14px;font-weight:600}
+  .badge{font-size:11px;padding:3px 10px;border-radius:20px;font-weight:600}
+  .badge.green{background:rgba(34,197,94,.15);color:var(--green)}
+  .badge.red{background:rgba(239,68,68,.15);color:var(--red)}
+  .badge.blue{background:rgba(79,142,247,.15);color:var(--accent)}
+  .btn{padding:6px 14px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;border:none}
+  .btn-primary{background:var(--accent);color:#fff}
+  .btn-danger{background:var(--red);color:#fff}
+  .btn-sm{padding:4px 10px;font-size:11px}
+  .content{flex:1;overflow-y:auto;padding:22px}
+  .section{display:none}.section.active{display:block}
+  .grid{display:grid;gap:16px}
+  .grid-4{grid-template-columns:repeat(4,1fr)}
+  .grid-2{grid-template-columns:repeat(2,1fr)}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:18px}
+  .card-title{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}
+  .card-value{font-size:28px;font-weight:800}
+  .card-sub{font-size:11px;color:var(--muted);margin-top:3px}
+  .section-title{font-size:16px;font-weight:700;margin-bottom:16px}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th{text-align:left;padding:10px 12px;border-bottom:1px solid var(--border);color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.5px}
+  td{padding:10px 12px;border-bottom:1px solid var(--border)}
+  tr:hover td{background:rgba(255,255,255,.03)}
+  .tag{font-size:10px;padding:2px 8px;border-radius:20px;font-weight:600}
+  .tag-green{background:rgba(34,197,94,.15);color:var(--green)}
+  .tag-red{background:rgba(239,68,68,.15);color:var(--red)}
+  .tag-blue{background:rgba(79,142,247,.15);color:var(--accent)}
+  .tag-yellow{background:rgba(245,158,11,.15);color:var(--yellow)}
+  .empty{text-align:center;padding:40px;color:var(--muted);font-size:13px}
+  .loading{text-align:center;padding:30px;color:var(--muted);font-size:13px}
+  .alert{padding:10px 14px;border-radius:8px;font-size:12px;margin-bottom:14px}
+  .alert-red{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:var(--red)}
+  .alert-green{background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.3);color:var(--green)}
+  input,select{background:var(--bg);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:6px;font-size:13px;width:100%}
+  input:focus,select:focus{outline:none;border-color:var(--accent)}
+  .form-group{margin-bottom:12px}
+  .form-group label{font-size:12px;color:var(--muted);display:block;margin-bottom:4px}
+  .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:100;align-items:center;justify-content:center}
+  .modal-overlay.open{display:flex}
+  .modal{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:24px;width:420px;max-width:90vw}
+  .modal h3{font-size:15px;font-weight:700;margin-bottom:16px}
+  .modal-footer{display:flex;gap:8px;justify-content:flex-end;margin-top:16px}
+  .health-item{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);font-size:13px}
+  #toast{position:fixed;bottom:20px;right:20px;background:var(--card);border:1px solid var(--border);padding:12px 18px;border-radius:8px;font-size:13px;z-index:200;display:none;animation:fadein .3s}
+  @keyframes fadein{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 </style>
 </head>
 <body>
 
-<!-- SIDEBAR -->
-<aside class="sidebar">
-  <div class="logo">
-    <h1>PRAGMIA</h1>
-    <p>ADMIN CONSOLE v1.0</p>
-  </div>
+<div class="sidebar">
+  <div class="logo"><h1>PRAGMIA</h1><p>Identity & Access Management</p></div>
   <nav class="nav">
-    <div class="nav-section">Core</div>
-    <div class="nav-item active" onclick="showPanel('dashboard')">
-      <span class="icon">⬡</span> Dashboard
-    </div>
-    <div class="nav-item" onclick="showPanel('users')">
-      <span class="icon">👤</span> Utenti
-    </div>
-    <div class="nav-item" onclick="showPanel('sessions')">
-      <span class="icon">⚡</span> Sessioni
-    </div>
-    <div class="nav-section">Auth Engine</div>
-    <div class="nav-item" onclick="showPanel('flows')">
-      <span class="icon">🔀</span> Flow Trees (CANTO)
-    </div>
-    <div class="nav-item" onclick="showPanel('policies')">
-      <span class="icon">🛡</span> Policy ABAC (MINOS)
-    </div>
-    <div class="nav-section">Operazioni</div>
-    <div class="nav-item" onclick="showPanel('audit')">
-      <span class="icon">📋</span> Audit Log (CLIO)
-    </div>
-    <div class="nav-item" onclick="showPanel('beatrice')">
-      <span class="icon">🤖</span> NLP Admin (BEATRICE)
-    </div>
-    <div class="nav-section">Compliance & Prov.</div>
-    <div class="nav-item" onclick="showPanel('compliance')">
-      <span class="icon">✅</span> Compliance (LUCE)
-    </div>
-    <div class="nav-item" onclick="showPanel('scim')">
-      <span class="icon">🔄</span> Provisioning (SIBILLA)
-    </div>
+    <div class="nav-section">Principale</div>
+    <div class="nav-item active" onclick="nav('dashboard')"><span>📊</span> Dashboard</div>
+    <div class="nav-section">IAM</div>
+    <div class="nav-item" onclick="nav('users')"><span>👥</span> Utenti</div>
+    <div class="nav-item" onclick="nav('sessions')"><span>🔗</span> Sessioni</div>
+    <div class="nav-item" onclick="nav('flows')"><span>🔀</span> Auth Flows</div>
+    <div class="nav-item" onclick="nav('policies')"><span>🛡️</span> Policy</div>
+    <div class="nav-section">Monitoring</div>
+    <div class="nav-item" onclick="nav('audit')"><span>📋</span> Audit Log</div>
+    <div class="nav-item" onclick="nav('health')"><span>❤️</span> Health</div>
+    <div class="nav-section">Tools</div>
+    <div class="nav-item" onclick="nav('nodes')"><span>🔧</span> Flow Nodes</div>
   </nav>
   <div class="sidebar-footer">
     <div class="user-badge">
-      <div class="avatar">RT</div>
+      <div class="avatar">A</div>
       <div class="user-info">
-        <div class="name">Roberto T.</div>
-        <div class="role">SUPER_ADMIN</div>
+        <div class="name" id="sidebar-user">admin</div>
+        <div class="role">PRAGMIA_ADMIN</div>
       </div>
     </div>
   </div>
-</aside>
-
-<!-- MAIN -->
-<div class="main">
-  <header class="topbar">
-    <span class="topbar-title" id="page-title">Dashboard</span>
-    <div class="topbar-right">
-      <span class="badge green">● Sistema Operativo</span>
-      <span class="badge blue">OAuth 2.1 / OIDC</span>
-      <button class="btn btn-ghost">Logout</button>
-    </div>
-  </header>
-
-  <main class="content">
-
-    <!-- ══════════════ DASHBOARD ══════════════ -->
-    <div class="panel active" id="panel-dashboard">
-      <div class="grid-4">
-        <div class="card">
-          <div class="card-header"><span class="card-title">Utenti Attivi</span><span class="card-icon">👤</span></div>
-          <div class="stat-value">1.284</div>
-          <div class="stat-delta delta-up">↑ 12% questa settimana</div>
-        </div>
-        <div class="card">
-          <div class="card-header"><span class="card-title">Sessioni Live</span><span class="card-icon">⚡</span></div>
-          <div class="stat-value">47</div>
-          <div class="stat-delta delta-up">↑ 3 nell'ultima ora</div>
-        </div>
-        <div class="card">
-          <div class="card-header"><span class="card-title">Token Emessi/24h</span><span class="card-icon">🔑</span></div>
-          <div class="stat-value">8.931</div>
-          <div class="stat-delta delta-up">↑ 5% vs ieri</div>
-        </div>
-        <div class="card">
-          <div class="card-header"><span class="card-title">Policy Deny/24h</span><span class="card-icon">🛡</span></div>
-          <div class="stat-value">23</div>
-          <div class="stat-delta delta-down">↑ 2 anomalie</div>
-        </div>
-      </div>
-
-      <div class="grid-2">
-        <!-- Compliance snapshot -->
-        <div class="card">
-          <div class="card-header"><span class="card-title">Compliance Score</span></div>
-          <div class="compliance-item">
-            <div class="compliance-header"><span>NIS2</span><span style="color:var(--green)">87%</span></div>
-            <div class="progress-bar"><div class="progress-fill" style="width:87%;background:var(--green)"></div></div>
-          </div>
-          <div class="compliance-item">
-            <div class="compliance-header"><span>DORA</span><span style="color:var(--accent)">92%</span></div>
-            <div class="progress-bar"><div class="progress-fill" style="width:92%;background:var(--accent)"></div></div>
-          </div>
-          <div class="compliance-item">
-            <div class="compliance-header"><span>GDPR</span><span style="color:var(--yellow)">74%</span></div>
-            <div class="progress-bar"><div class="progress-fill" style="width:74%;background:var(--yellow)"></div></div>
-          </div>
-          <div class="compliance-item">
-            <div class="compliance-header"><span>AgID</span><span style="color:var(--green)">95%</span></div>
-            <div class="progress-bar"><div class="progress-fill" style="width:95%;background:var(--green)"></div></div>
-          </div>
-        </div>
-
-        <!-- Audit feed -->
-        <div class="card">
-          <div class="card-header"><span class="card-title">Audit Log — Ultimi eventi</span></div>
-          <div class="feed-item">
-            <div class="feed-dot" style="background:var(--green)"></div>
-            <div class="feed-body">
-              <div class="feed-event">AUTH_SUCCESS — marco.rossi@acme.it</div>
-              <div class="feed-meta">192.168.1.10 · 2 min fa · VIRGILIO</div>
-            </div>
-          </div>
-          <div class="feed-item">
-            <div class="feed-dot" style="background:var(--red)"></div>
-            <div class="feed-body">
-              <div class="feed-event">AUTH_FAILURE — unknown@ext.com (3° tentativo)</div>
-              <div class="feed-meta">45.33.32.156 · 5 min fa · VIRGILIO</div>
-            </div>
-          </div>
-          <div class="feed-item">
-            <div class="feed-dot" style="background:var(--yellow)"></div>
-            <div class="feed-body">
-              <div class="feed-event">POLICY_EVALUATED_DENY — GET /api/reports</div>
-              <div class="feed-meta">user:luca.bianchi · 8 min fa · MINOS</div>
-            </div>
-          </div>
-          <div class="feed-item">
-            <div class="feed-dot" style="background:var(--accent)"></div>
-            <div class="feed-body">
-              <div class="feed-event">NLP_DUAL_APPROVAL_REQUESTED — disable user</div>
-              <div class="feed-meta">admin:roberto.t · 12 min fa · BEATRICE</div>
-            </div>
-          </div>
-          <div class="feed-item">
-            <div class="feed-dot" style="background:var(--green)"></div>
-            <div class="feed-body">
-              <div class="feed-event">ADMIN_USER_CREATED — via SCIM 2.0</div>
-              <div class="feed-meta">client:hr-system · 18 min fa · SIBILLA</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Moduli status -->
-      <div class="card">
-        <div class="card-header"><span class="card-title">Stato Moduli</span></div>
-        <table>
-          <thead><tr><th>Modulo</th><th>Descrizione</th><th>Tier</th><th>Stato</th><th>Versione</th></tr></thead>
-          <tbody>
-            <tr><td><strong>VIRGILIO</strong></td><td>OAuth 2.1 / OIDC + Flow Engine</td><td><span class="tag tag-blue">Community</span></td><td><span class="status-dot dot-green"></span>Running</td><td>1.0.0</td></tr>
-            <tr><td><strong>CANTO</strong></td><td>Flow Trees CRUD + DAG Validator</td><td><span class="tag tag-blue">Community</span></td><td><span class="status-dot dot-green"></span>Running</td><td>1.0.0</td></tr>
-            <tr><td><strong>CLIO</strong></td><td>Audit Log immutabile PostgreSQL</td><td><span class="tag tag-blue">Community</span></td><td><span class="status-dot dot-green"></span>Running</td><td>1.0.0</td></tr>
-            <tr><td><strong>SOGLIA</strong></td><td>JWT filter + Rate Limiter Redis</td><td><span class="tag tag-blue">Community</span></td><td><span class="status-dot dot-green"></span>Running</td><td>1.0.0</td></tr>
-            <tr><td><strong>BEATRICE</strong></td><td>NLP Admin Ollama + Dual-Approval</td><td><span class="tag tag-purple">Enterprise</span></td><td><span class="status-dot dot-green"></span>Running</td><td>1.0.0</td></tr>
-            <tr><td><strong>MINOS</strong></td><td>Policy Engine ABAC SpEL</td><td><span class="tag tag-purple">Enterprise</span></td><td><span class="status-dot dot-green"></span>Running</td><td>1.0.0</td></tr>
-            <tr><td><strong>LUCE</strong></td><td>Compliance NIS2/DORA/GDPR/AgID</td><td><span class="tag tag-purple">Enterprise</span></td><td><span class="status-dot dot-green"></span>Running</td><td>1.0.0</td></tr>
-            <tr><td><strong>SIBILLA</strong></td><td>Provisioning SCIM 2.0 / LDAP</td><td><span class="tag tag-purple">Enterprise</span></td><td><span class="status-dot dot-green"></span>Running</td><td>1.0.0</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- ══════════════ UTENTI ══════════════ -->
-    <div class="panel" id="panel-users">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
-        <div></div>
-        <button class="btn btn-primary">+ Nuovo Utente</button>
-      </div>
-      <div class="card">
-        <table>
-          <thead><tr><th>Username</th><th>Email</th><th>Ruolo</th><th>MFA</th><th>Stato</th><th>Ultimo accesso</th><th></th></tr></thead>
-          <tbody>
-            <tr><td>marco.rossi</td><td>marco.rossi@acme.it</td><td><span class="tag tag-blue">USER</span></td><td><span class="tag tag-green">TOTP ✓</span></td><td><span class="status-dot dot-green"></span>Attivo</td><td>2 min fa</td><td><button class="btn btn-ghost" style="font-size:11px;padding:4px 10px">Gestisci</button></td></tr>
-            <tr><td>luca.bianchi</td><td>luca.bianchi@acme.it</td><td><span class="tag tag-blue">USER</span></td><td><span class="tag tag-red">No MFA</span></td><td><span class="status-dot dot-green"></span>Attivo</td><td>1h fa</td><td><button class="btn btn-ghost" style="font-size:11px;padding:4px 10px">Gestisci</button></td></tr>
-            <tr><td>admin.system</td><td>admin@pragmia.io</td><td><span class="tag tag-purple">SUPER_ADMIN</span></td><td><span class="tag tag-green">TOTP ✓</span></td><td><span class="status-dot dot-green"></span>Attivo</td><td>Ora</td><td><button class="btn btn-ghost" style="font-size:11px;padding:4px 10px">Gestisci</button></td></tr>
-            <tr><td>giulia.verde</td><td>giulia.verde@acme.it</td><td><span class="tag tag-yellow">ADMIN</span></td><td><span class="tag tag-green">TOTP ✓</span></td><td><span class="status-dot dot-red"></span>Disabilitato</td><td>3gg fa</td><td><button class="btn btn-ghost" style="font-size:11px;padding:4px 10px">Gestisci</button></td></tr>
-            <tr><td>service.hr</td><td>hr-system@ext.com</td><td><span class="tag tag-blue">SERVICE</span></td><td><span class="tag tag-blue">N/A</span></td><td><span class="status-dot dot-green"></span>Attivo</td><td>18 min fa</td><td><button class="btn btn-ghost" style="font-size:11px;padding:4px 10px">Gestisci</button></td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- ══════════════ SESSIONS ══════════════ -->
-    <div class="panel" id="panel-sessions">
-      <div style="display:flex;justify-content:space-between;margin-bottom:20px">
-        <div></div>
-        <button class="btn btn-ghost" style="color:var(--red);border-color:var(--red)">⚠ Kill All Sessions</button>
-      </div>
-      <div class="card">
-        <table>
-          <thead><tr><th>Session ID</th><th>Utente</th><th>IP</th><th>Creata</th><th>Idle</th><th>Client</th><th></th></tr></thead>
-          <tbody>
-            <tr><td style="font-family:monospace;font-size:11px">sess_4f8e2a...</td><td>marco.rossi</td><td>192.168.1.10</td><td>14:32</td><td>2 min</td><td>web-app</td><td><button class="btn btn-ghost" style="font-size:11px;padding:4px 10px;color:var(--red)">Kill</button></td></tr>
-            <tr><td style="font-family:monospace;font-size:11px">sess_9b1c7d...</td><td>admin.system</td><td>10.0.0.1</td><td>13:55</td><td>0 min</td><td>swagger-ui</td><td><button class="btn btn-ghost" style="font-size:11px;padding:4px 10px;color:var(--red)">Kill</button></td></tr>
-            <tr><td style="font-family:monospace;font-size:11px">sess_2e5a9f...</td><td>giulia.verde</td><td>192.168.2.44</td><td>13:20</td><td>28 min</td><td>mobile-app</td><td><button class="btn btn-ghost" style="font-size:11px;padding:4px 10px;color:var(--red)">Kill</button></td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- ══════════════ FLOW TREES ══════════════ -->
-    <div class="panel" id="panel-flows">
-      <div class="grid-2">
-        <div class="card">
-          <div class="card-header"><span class="card-title">Flow Trees</span><button class="btn btn-primary" style="font-size:11px;padding:5px 12px">+ Nuovo</button></div>
-          <table>
-            <thead><tr><th>Nome</th><th>Nodi</th><th>Stato</th><th></th></tr></thead>
-            <tbody>
-              <tr><td><strong>Standard MFA Flow</strong></td><td>5</td><td><span class="tag tag-green">ATTIVO</span></td><td><button class="btn btn-ghost" style="font-size:11px;padding:4px 10px" onclick="showFlow()">Visualizza</button></td></tr>
-              <tr><td>Legacy Password Only</td><td>3</td><td><span class="tag tag-yellow">INATTIVO</span></td><td><button class="btn btn-ghost" style="font-size:11px;padding:4px 10px">Visualizza</button></td></tr>
-              <tr><td>Passwordless FIDO2</td><td>4</td><td><span class="tag tag-yellow">DRAFT</span></td><td><button class="btn btn-ghost" style="font-size:11px;padding:4px 10px">Visualizza</button></td></tr>
-            </tbody>
-          </table>
-        </div>
-        <div class="card" id="flow-preview">
-          <div class="card-header"><span class="card-title">Preview — Standard MFA Flow</span></div>
-          <div class="flow-canvas">
-            <div class="flow-node start">▶ START</div>
-            <div class="flow-arrow"><div class="flow-line"></div></div>
-            <div class="flow-node action">🔐 Username + Password</div>
-            <div class="flow-arrow"><div class="flow-line"></div></div>
-            <div class="flow-split">
-              <div class="flow-branch">
-                <div class="flow-label" style="color:var(--red)">FAIL</div>
-                <div class="flow-node fail">✗ DENY</div>
-              </div>
-              <div class="flow-branch">
-                <div class="flow-label" style="color:var(--green)">OK</div>
-                <div class="flow-node action">📱 TOTP MFA</div>
-                <div class="flow-arrow"><div class="flow-line"></div></div>
-                <div class="flow-split">
-                  <div class="flow-branch">
-                    <div class="flow-label" style="color:var(--red)">FAIL</div>
-                    <div class="flow-node fail">✗ DENY</div>
-                  </div>
-                  <div class="flow-branch">
-                    <div class="flow-label" style="color:var(--green)">OK</div>
-                    <div class="flow-node success">✓ ALLOW</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ══════════════ POLICIES ══════════════ -->
-    <div class="panel" id="panel-policies">
-      <div style="display:flex;justify-content:space-between;margin-bottom:20px">
-        <div></div>
-        <button class="btn btn-primary">+ Nuova Policy</button>
-      </div>
-      <div class="card">
-        <table>
-          <thead><tr><th>#</th><th>Nome</th><th>Condizione SpEL</th><th>Effetto</th><th>Priorità</th><th>Stato</th></tr></thead>
-          <tbody>
-            <tr><td>1</td><td>allow-admin-scope</td><td style="font-family:monospace;font-size:11px">#claims['scope'].contains('admin')</td><td><span class="tag tag-green">PERMIT</span></td><td>1</td><td><span class="status-dot dot-green"></span>Attiva</td></tr>
-            <tr><td>2</td><td>deny-suspicious-ip</td><td style="font-family:monospace;font-size:11px">!#environment['remoteIp'].startsWith('10.')</td><td><span class="tag tag-red">DENY</span></td><td>5</td><td><span class="status-dot dot-green"></span>Attiva</td></tr>
-            <tr><td>3</td><td>allow-read-all</td><td style="font-family:monospace;font-size:11px">#action == 'GET'</td><td><span class="tag tag-green">PERMIT</span></td><td>50</td><td><span class="status-dot dot-green"></span>Attiva</td></tr>
-            <tr><td>4</td><td>deny-weekend-writes</td><td style="font-family:monospace;font-size:11px">#action != 'GET' && T(java.time.DayOfWeek).from(T(java.time.LocalDate).now()) >= 6</td><td><span class="tag tag-red">DENY</span></td><td>10</td><td><span class="status-dot dot-yellow"></span>Inattiva</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- ══════════════ AUDIT ══════════════ -->
-    <div class="panel" id="panel-audit">
-      <div class="card">
-        <div style="display:flex;gap:10px;margin-bottom:16px">
-          <select style="background:var(--bg);border:1px solid var(--border);color:var(--text);padding:6px 12px;border-radius:6px;font-size:12px">
-            <option>Tutti i tipi</option><option>AUTH_SUCCESS</option><option>AUTH_FAILURE</option>
-            <option>POLICY_EVALUATED_DENY</option><option>NLP_COMMAND_RECEIVED</option>
-          </select>
-          <input type="text" placeholder="Cerca utente / IP..." style="background:var(--bg);border:1px solid var(--border);color:var(--text);padding:6px 12px;border-radius:6px;font-size:12px;flex:1"/>
-          <button class="btn btn-primary">Filtra</button>
-        </div>
-        <table>
-          <thead><tr><th>Timestamp</th><th>Tipo</th><th>Utente</th><th>IP</th><th>Risorsa</th><th>Risultato</th></tr></thead>
-          <tbody>
-            <tr><td style="font-size:11px;color:var(--muted)">14:47:03</td><td><span class="tag tag-green">AUTH_SUCCESS</span></td><td>marco.rossi</td><td>192.168.1.10</td><td>/oauth2/token</td><td>✓ OK</td></tr>
-            <tr><td style="font-size:11px;color:var(--muted)">14:45:22</td><td><span class="tag tag-red">AUTH_FAILURE</span></td><td>unknown</td><td>45.33.32.156</td><td>/login</td><td>✗ Bad credentials</td></tr>
-            <tr><td style="font-size:11px;color:var(--muted)">14:42:11</td><td><span class="tag tag-yellow">POLICY_DENY</span></td><td>luca.bianchi</td><td>192.168.1.44</td><td>/api/reports</td><td>✗ Denied</td></tr>
-            <tr><td style="font-size:11px;color:var(--muted)">14:39:55</td><td><span class="tag tag-blue">TOKEN_ISSUED</span></td><td>admin.system</td><td>10.0.0.1</td><td>/oauth2/token</td><td>✓ OK</td></tr>
-            <tr><td style="font-size:11px;color:var(--muted)">14:30:00</td><td><span class="tag tag-purple">NLP_COMMAND</span></td><td>roberto.t</td><td>10.0.0.1</td><td>/api/admin/beatrice/ask</td><td>⏳ Pending</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- ══════════════ BEATRICE ══════════════ -->
-    <div class="panel" id="panel-beatrice">
-      <div class="grid-2">
-        <div class="card">
-          <div class="card-header"><span class="card-title">Comando NLP</span></div>
-          <div style="margin-bottom:12px">
-            <textarea placeholder="Es: Disabilita tutti gli utenti senza MFA attivo..." rows="4"
-              style="width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);
-                     padding:12px;border-radius:8px;font-size:13px;resize:vertical;font-family:var(--font)"></textarea>
-          </div>
-          <button class="btn btn-primary" style="width:100%">🤖 Invia a BEATRICE</button>
-        </div>
-        <div class="card">
-          <div class="card-header"><span class="card-title">In attesa di Dual-Approval</span><span class="tag tag-yellow">2 pending</span></div>
-          <div style="border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:12px">
-            <div style="font-size:13px;margin-bottom:6px"><strong>Disabilita utente giulia.verde</strong></div>
-            <div style="font-size:11px;color:var(--muted);margin-bottom:10px">Richiesto da: roberto.t · 12 min fa</div>
-            <div style="font-family:monospace;font-size:11px;background:var(--bg);padding:8px;border-radius:4px;margin-bottom:10px;color:var(--yellow)">
-              UPDATE virgilio_users SET enabled=false WHERE username='giulia.verde'
-            </div>
-            <div style="display:flex;gap:8px">
-              <button class="btn btn-primary" style="flex:1">✓ Approva</button>
-              <button class="btn btn-ghost" style="flex:1;color:var(--red)">✗ Rifiuta</button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ══════════════ COMPLIANCE ══════════════ -->
-    <div class="panel" id="panel-compliance">
-      <div style="display:flex;gap:10px;margin-bottom:20px">
-        <button class="btn btn-primary" onclick="this.textContent='⏳ Generando...'">▶ Genera Report NIS2</button>
-        <button class="btn btn-ghost">▶ Report DORA</button>
-        <button class="btn btn-ghost">▶ Report GDPR</button>
-        <button class="btn btn-ghost">▶ Report AgID</button>
-      </div>
-      <div class="card">
-        <div class="card-header"><span class="card-title">Ultimo Report — NIS2 (02/05/2026)</span><span class="tag tag-green">87% Score</span></div>
-        <table>
-          <thead><tr><th>Control ID</th><th>Art. Rif.</th><th>Titolo</th><th>Stato</th><th>Dettaglio</th></tr></thead>
-          <tbody>
-            <tr><td style="font-family:monospace;font-size:11px">NIS2-ART21-MFA</td><td>Art.21(2)(a)</td><td>MFA per tutti gli utenti</td><td><span class="tag tag-red">FAIL</span></td><td style="font-size:11px;color:var(--muted)">1.200/1.284 utenti con MFA (93.5%)</td></tr>
-            <tr><td style="font-family:monospace;font-size:11px">NIS2-ART21-AUDIT</td><td>Art.21(2)(j)</td><td>Audit log retention 365gg</td><td><span class="tag tag-green">PASS</span></td><td style="font-size:11px;color:var(--muted)">Nessun evento scaduto rilevato</td></tr>
-            <tr><td style="font-family:monospace;font-size:11px">DORA-ART9-SESSION</td><td>Art.9(4)(d)</td><td>Session idle timeout</td><td><span class="tag tag-green">PASS</span></td><td style="font-size:11px;color:var(--muted)">Timeout: 30 min ✓</td></tr>
-            <tr><td style="font-family:monospace;font-size:11px">AGID-PWD-POLICY</td><td>LLGG-2020</td><td>Password policy</td><td><span class="tag tag-yellow">MANUAL</span></td><td style="font-size:11px;color:var(--muted)">Verifica manuale richiesta</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- ══════════════ SCIM ══════════════ -->
-    <div class="panel" id="panel-scim">
-      <div class="card" style="margin-bottom:16px">
-        <div class="card-header"><span class="card-title">SCIM 2.0 Endpoint</span><span class="tag tag-green">Operativo</span></div>
-        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;font-size:12px">
-          <div style="background:var(--bg);padding:12px;border-radius:8px;border:1px solid var(--border)">
-            <div style="color:var(--muted);margin-bottom:4px">Base URL</div>
-            <div style="font-family:monospace">/scim/v2/Users</div>
-          </div>
-          <div style="background:var(--bg);padding:12px;border-radius:8px;border:1px solid var(--border)">
-            <div style="color:var(--muted);margin-bottom:4px">Auth</div>
-            <div>Bearer Token (scope: scim)</div>
-          </div>
-          <div style="background:var(--bg);padding:12px;border-radius:8px;border:1px solid var(--border)">
-            <div style="color:var(--muted);margin-bottom:4px">Utenti Sincronizzati</div>
-            <div style="font-size:18px;font-weight:700">1.284</div>
-          </div>
-        </div>
-      </div>
-      <div class="card">
-        <div class="card-header"><span class="card-title">Log Provisioning Recente</span></div>
-        <table>
-          <thead><tr><th>Timestamp</th><th>Operazione</th><th>Username</th><th>Client</th><th>Esito</th></tr></thead>
-          <tbody>
-            <tr><td style="font-size:11px;color:var(--muted)">14:30:00</td><td><span class="tag tag-green">CREATE</span></td><td>new.hire@acme.it</td><td>hr-system</td><td>✓ 201 Created</td></tr>
-            <tr><td style="font-size:11px;color:var(--muted)">12:15:33</td><td><span class="tag tag-yellow">PATCH</span></td><td>giulia.verde@acme.it</td><td>hr-system</td><td>✓ 200 OK</td></tr>
-            <tr><td style="font-size:11px;color:var(--muted)">09:00:01</td><td><span class="tag tag-red">DELETE</span></td><td>ex.employee@acme.it</td><td>hr-system</td><td>✓ 204 No Content</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-  </main>
 </div>
 
-<script>
-const titles = {
-  dashboard:'Dashboard', users:'Gestione Utenti', sessions:'Sessioni Attive',
-  flows:'Flow Trees (CANTO)', policies:'Policy ABAC (MINOS)',
-  audit:'Audit Log (CLIO)', beatrice:'NLP Admin (BEATRICE)',
-  compliance:'Compliance (LUCE)', scim:'Provisioning SCIM 2.0 (SIBILLA)'
-};
+<div class="main">
+  <div class="topbar">
+    <span class="topbar-title" id="topbar-title">Dashboard</span>
+    <div style="display:flex;gap:10px;align-items:center">
+      <span class="badge green" id="status-badge">● ONLINE</span>
+      <button class="btn btn-primary btn-sm" onclick="refreshCurrent()">↻ Aggiorna</button>
+      <button class="btn btn-danger btn-sm" onclick="logout()">Esci</button>
+    </div>
+  </div>
+  <div class="content">
 
-function showPanel(name) {
-  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  document.getElementById('panel-' + name).classList.add('active');
-  document.getElementById('page-title').textContent = titles[name] || name;
-  event.currentTarget.classList.add('active');
+    <!-- DASHBOARD -->
+    <div class="section active" id="section-dashboard">
+      <div class="section-title">Dashboard</div>
+      <div class="grid grid-4" style="margin-bottom:20px">
+        <div class="card"><div class="card-title">Utenti Totali</div><div class="card-value" id="d-users">—</div><div class="card-sub">Registrati nel sistema</div></div>
+        <div class="card"><div class="card-title">Sessioni Attive</div><div class="card-value" id="d-sessions">—</div><div class="card-sub">Connessioni correnti</div></div>
+        <div class="card"><div class="card-title">Policy Attive</div><div class="card-value" id="d-policies">—</div><div class="card-sub">Regole di accesso</div></div>
+        <div class="card"><div class="card-title">Auth Flows</div><div class="card-value" id="d-flows">—</div><div class="card-sub">Flussi configurati</div></div>
+      </div>
+      <div class="grid grid-2">
+        <div class="card">
+          <div class="card-title" style="margin-bottom:12px">Ultimi Audit Log</div>
+          <div id="d-audit-list"><div class="loading">Caricamento...</div></div>
+        </div>
+        <div class="card">
+          <div class="card-title" style="margin-bottom:12px">Stato Sistema</div>
+          <div id="d-health-list"><div class="loading">Caricamento...</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- UTENTI -->
+    <div class="section" id="section-users">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+        <div class="section-title" style="margin:0">Utenti</div>
+        <button class="btn btn-primary btn-sm" onclick="openCreateUser()">+ Nuovo Utente</button>
+      </div>
+      <div class="card"><div id="users-table"><div class="loading">Caricamento...</div></div></div>
+    </div>
+
+    <!-- SESSIONI -->
+    <div class="section" id="section-sessions">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+        <div class="section-title" style="margin:0">Sessioni Attive</div>
+        <button class="btn btn-danger btn-sm" onclick="killAllSessions()">⚠ Kill All Sessions</button>
+      </div>
+      <div class="card"><div id="sessions-table"><div class="loading">Caricamento...</div></div></div>
+    </div>
+
+    <!-- FLOWS -->
+    <div class="section" id="section-flows">
+      <div class="section-title">Auth Flows</div>
+      <div class="card"><div id="flows-table"><div class="loading">Caricamento...</div></div></div>
+    </div>
+
+    <!-- POLICY -->
+    <div class="section" id="section-policies">
+      <div class="section-title">Policy</div>
+      <div class="card"><div id="policies-table"><div class="loading">Caricamento...</div></div></div>
+    </div>
+
+    <!-- AUDIT -->
+    <div class="section" id="section-audit">
+      <div class="section-title">Audit Log</div>
+      <div class="card"><div id="audit-table"><div class="loading">Caricamento...</div></div></div>
+    </div>
+
+    <!-- HEALTH -->
+    <div class="section" id="section-health">
+      <div class="section-title">Health & Status</div>
+      <div class="card"><div id="health-detail"><div class="loading">Caricamento...</div></div></div>
+    </div>
+
+    <!-- NODES -->
+    <div class="section" id="section-nodes">
+      <div class="section-title">Flow Nodes Disponibili</div>
+      <div class="card"><div id="nodes-table"><div class="loading">Caricamento...</div></div></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- MODAL CREA UTENTE -->
+<div class="modal-overlay" id="modal-create-user">
+  <div class="modal">
+    <h3>Crea Nuovo Utente</h3>
+    <div id="modal-alert"></div>
+    <div class="form-group"><label>Username</label><input id="new-username" placeholder="mario.rossi"/></div>
+    <div class="form-group"><label>Email</label><input id="new-email" type="email" placeholder="mario@example.com"/></div>
+    <div class="form-group"><label>Nome Completo</label><input id="new-fullname" placeholder="Mario Rossi"/></div>
+    <div class="form-group"><label>Password</label><input id="new-password" type="password" placeholder="Min 8 caratteri"/></div>
+    <div class="modal-footer">
+      <button class="btn btn-sm" onclick="closeModal()" style="background:var(--border)">Annulla</button>
+      <button class="btn btn-primary btn-sm" onclick="createUser()">Crea</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+const API = '';
+let currentSection = 'dashboard';
+let currentRefresh = null;
+
+async function apiFetch(url, opts={}) {
+  try {
+    const r = await fetch(API + url, {credentials:'include', ...opts,
+      headers:{'Content-Type':'application/json',...(opts.headers||{})}});
+    if (r.status === 401) { window.location='/login'; return null; }
+    if (!r.ok) throw new Error(await r.text());
+    if (r.status === 204) return {};
+    return r.json();
+  } catch(e) { toast('Errore: ' + e.message, true); return null; }
 }
+
+function toast(msg, err=false) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.borderColor = err ? 'var(--red)' : 'var(--green)';
+  t.style.display = 'block';
+  setTimeout(()=>t.style.display='none', 3000);
+}
+
+function nav(section) {
+  document.querySelectorAll('.nav-item').forEach(i=>i.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.getElementById('section-'+section).classList.add('active');
+  document.getElementById('topbar-title').textContent =
+    {dashboard:'Dashboard',users:'Utenti',sessions:'Sessioni',flows:'Auth Flows',
+     policies:'Policy',audit:'Audit Log',health:'Health',nodes:'Flow Nodes'}[section];
+  currentSection = section;
+  loadSection(section);
+}
+
+function refreshCurrent() { loadSection(currentSection); }
+
+function loadSection(s) {
+  if(s==='dashboard') loadDashboard();
+  else if(s==='users') loadUsers();
+  else if(s==='sessions') loadSessions();
+  else if(s==='flows') loadFlows();
+  else if(s==='policies') loadPolicies();
+  else if(s==='audit') loadAudit();
+  else if(s==='health') loadHealth();
+  else if(s==='nodes') loadNodes();
+}
+
+async function loadDashboard() {
+  const [users, sessions, policies, flows, audit, health] = await Promise.all([
+    apiFetch('/api/admin/v1/users?size=1'),
+    apiFetch('/api/admin/v1/sessions/count'),
+    apiFetch('/api/admin/policies'),
+    apiFetch('/api/admin/flows'),
+    apiFetch('/api/admin/audit?size=5'),
+    apiFetch('/actuator/health')
+  ]);
+  if(users) document.getElementById('d-users').textContent = users.totalElements ?? (users.content?.length ?? '?');
+  if(sessions != null) document.getElementById('d-sessions').textContent = typeof sessions === 'number' ? sessions : (sessions.count ?? sessions ?? '?');
+  if(policies) document.getElementById('d-policies').textContent = Array.isArray(policies) ? policies.length : (policies.totalElements ?? policies.content?.length ?? '?');
+  if(flows) document.getElementById('d-flows').textContent = Array.isArray(flows) ? flows.length : (flows.totalElements ?? '?');
+
+  // Audit preview
+  const auditEl = document.getElementById('d-audit-list');
+  const logs = Array.isArray(audit) ? audit : (audit?.content ?? []);
+  if(logs.length===0) { auditEl.innerHTML='<div class="empty">Nessun log disponibile</div>'; }
+  else auditEl.innerHTML = logs.slice(0,5).map(l=>`
+    <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-size:12px">
+      <span><span class="tag tag-blue">${l.eventType||l.type||'EVENT'}</span> ${l.username||l.userId||'—'}</span>
+      <span style="color:var(--muted)">${fmtDate(l.timestamp||l.createdAt)}</span>
+    </div>`).join('');
+
+  // Health preview
+  const healthEl = document.getElementById('d-health-list');
+  if(health) {
+    const status = health.status === 'UP';
+    document.getElementById('status-badge').textContent = status ? '● ONLINE' : '● DEGRADED';
+    document.getElementById('status-badge').className = 'badge ' + (status?'green':'red');
+    const components = health.components || {};
+    healthEl.innerHTML = `<div class="health-item"><span>Status</span><span class="tag ${status?'tag-green':'tag-red'}">${health.status}</span></div>` +
+      Object.entries(components).map(([k,v])=>`
+        <div class="health-item"><span>${k}</span><span class="tag ${v.status==='UP'?'tag-green':'tag-red'}">${v.status}</span></div>`).join('');
+  }
+}
+
+async function loadUsers() {
+  const data = await apiFetch('/api/admin/v1/users?size=50');
+  const users = data?.content ?? (Array.isArray(data) ? data : []);
+  const el = document.getElementById('users-table');
+  if(!users.length) { el.innerHTML='<div class="empty">Nessun utente trovato</div>'; return; }
+  el.innerHTML = `<table><thead><tr><th>Username</th><th>Email</th><th>Nome</th><th>Stato</th><th>Azioni</th></tr></thead><tbody>` +
+    users.map(u=>`<tr>
+      <td><strong>${u.username}</strong></td>
+      <td>${u.email||'—'}</td>
+      <td>${u.fullName||u.full_name||'—'}</td>
+      <td><span class="tag ${u.enabled?'tag-green':'tag-red'}">${u.enabled?'Attivo':'Disabilitato'}</span></td>
+      <td><button class="btn btn-danger btn-sm" onclick="disableUser('${u.id}','${u.username}')">Disabilita</button></td>
+    </tr>`).join('') + '</tbody></table>';
+}
+
+async function disableUser(id, username) {
+  if(!confirm(`Disabilitare utente ${username}?`)) return;
+  const r = await apiFetch(`/api/admin/v1/users/${id}/disable`, {method:'DELETE'});
+  if(r!==null) { toast(`Utente ${username} disabilitato`); loadUsers(); }
+}
+
+async function loadSessions() {
+  const data = await apiFetch('/api/admin/v1/sessions/count');
+  const el = document.getElementById('sessions-table');
+  const count = typeof data === 'number' ? data : (data?.count ?? 0);
+  el.innerHTML = `<div style="padding:20px 0">
+    <div class="card-title">Sessioni attualmente attive</div>
+    <div class="card-value" style="font-size:48px;margin:16px 0">${count}</div>
+    ${count>0?'<button class="btn btn-danger" onclick="killAllSessions()">⚠ Termina tutte le sessioni</button>':'<p style="color:var(--muted);font-size:13px">Nessuna sessione attiva</p>'}
+  </div>`;
+}
+
+async function killAllSessions() {
+  if(!confirm('Terminare TUTTE le sessioni attive?')) return;
+  const r = await apiFetch('/api/admin/v1/sessions', {method:'DELETE'});
+  if(r!==null) { toast('Tutte le sessioni terminate'); loadSessions(); }
+}
+
+async function loadFlows() {
+  const data = await apiFetch('/api/admin/flows');
+  const flows = Array.isArray(data) ? data : (data?.content ?? []);
+  const el = document.getElementById('flows-table');
+  if(!flows.length) { el.innerHTML='<div class="empty">Nessun flow configurato</div>'; return; }
+  el.innerHTML = `<table><thead><tr><th>Nome</th><th>Stato</th><th>Azioni</th></tr></thead><tbody>` +
+    flows.map(f=>`<tr>
+      <td><strong>${f.name}</strong></td>
+      <td><span class="tag ${f.isActive||f.active?'tag-green':'tag-blue'}">${f.isActive||f.active?'Attivo':'Inattivo'}</span></td>
+      <td>${!(f.isActive||f.active)?`<button class="btn btn-primary btn-sm" onclick="activateFlow('${f.id}')">Attiva</button>`:'<span style="color:var(--muted);font-size:12px">Flow corrente</span>'}</td>
+    </tr>`).join('') + '</tbody></table>';
+}
+
+async function activateFlow(id) {
+  const r = await apiFetch(`/api/admin/flows/${id}/activate`, {method:'POST'});
+  if(r!==null) { toast('Flow attivato'); loadFlows(); }
+}
+
+async function loadPolicies() {
+  const data = await apiFetch('/api/admin/policies');
+  const policies = Array.isArray(data) ? data : (data?.content ?? []);
+  const el = document.getElementById('policies-table');
+  if(!policies.length) { el.innerHTML='<div class="empty">Nessuna policy configurata</div>'; return; }
+  el.innerHTML = `<table><thead><tr><th>Nome</th><th>Tipo</th><th>Priorità</th><th>Azioni</th></tr></thead><tbody>` +
+    policies.map(p=>`<tr>
+      <td><strong>${p.name}</strong></td>
+      <td><span class="tag tag-blue">${p.type||p.policyType||'POLICY'}</span></td>
+      <td>${p.priority??'—'}</td>
+      <td><button class="btn btn-danger btn-sm" onclick="deletePolicy('${p.id}')">Elimina</button></td>
+    </tr>`).join('') + '</tbody></table>';
+}
+
+async function deletePolicy(id) {
+  if(!confirm('Eliminare questa policy?')) return;
+  const r = await apiFetch(`/api/admin/policies/${id}`, {method:'DELETE'});
+  if(r!==null) { toast('Policy eliminata'); loadPolicies(); }
+}
+
+async function loadAudit() {
+  const data = await apiFetch('/api/admin/audit?size=100');
+  const logs = Array.isArray(data) ? data : (data?.content ?? []);
+  const el = document.getElementById('audit-table');
+  if(!logs.length) { el.innerHTML='<div class="empty">Nessun log disponibile</div>'; return; }
+  el.innerHTML = `<table><thead><tr><th>Timestamp</th><th>Tipo</th><th>Utente</th><th>Risorsa</th><th>Esito</th></tr></thead><tbody>` +
+    logs.map(l=>`<tr>
+      <td style="color:var(--muted);font-size:11px">${fmtDate(l.timestamp||l.createdAt)}</td>
+      <td><span class="tag tag-blue">${l.eventType||l.type||'—'}</span></td>
+      <td>${l.username||l.userId||'—'}</td>
+      <td>${l.resource||l.target||'—'}</td>
+      <td><span class="tag ${l.success||l.outcome==='SUCCESS'?'tag-green':'tag-red'}">${l.success||l.outcome==='SUCCESS'?'OK':'DENIED'}</span></td>
+    </tr>`).join('') + '</tbody></table>';
+}
+
+async function loadHealth() {
+  const data = await apiFetch('/actuator/health');
+  const el = document.getElementById('health-detail');
+  if(!data) return;
+  const components = data.components || {};
+  el.innerHTML = `<div class="health-item" style="font-size:15px;font-weight:700">
+    <span>Stato Generale</span><span class="tag ${data.status==='UP'?'tag-green':'tag-red'}" style="font-size:13px">${data.status}</span>
+  </div>` + Object.entries(components).map(([k,v])=>`
+    <div class="health-item">
+      <div><strong>${k}</strong>${v.details?.url?`<div style="font-size:11px;color:var(--muted)">${v.details.url}</div>`:''}</div>
+      <span class="tag ${v.status==='UP'?'tag-green':v.status==='UNKNOWN'?'tag-yellow':'tag-red'}">${v.status}</span>
+    </div>`).join('');
+}
+
+async function loadNodes() {
+  const data = await apiFetch('/api/admin/v1/nodes');
+  const nodes = Array.isArray(data) ? data : [];
+  const el = document.getElementById('nodes-table');
+  if(!nodes.length) { el.innerHTML='<div class="empty">Nessun nodo disponibile</div>'; return; }
+  el.innerHTML = `<table><thead><tr><th>Tipo</th><th>Categoria</th><th>Descrizione</th></tr></thead><tbody>` +
+    nodes.map(n=>`<tr>
+      <td><strong>${n.type||n.nodeType}</strong></td>
+      <td><span class="tag tag-blue">${n.category||'—'}</span></td>
+      <td style="color:var(--muted);font-size:12px">${n.description||'—'}</td>
+    </tr>`).join('') + '</tbody></table>';
+}
+
+function fmtDate(ts) {
+  if(!ts) return '—';
+  return new Date(ts).toLocaleString('it-IT',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
+}
+
+function openCreateUser() {
+  document.getElementById('modal-create-user').classList.add('open');
+  document.getElementById('modal-alert').innerHTML='';
+}
+function closeModal() { document.getElementById('modal-create-user').classList.remove('open'); }
+
+async function createUser() {
+  const body = {
+    username: document.getElementById('new-username').value,
+    email: document.getElementById('new-email').value,
+    fullName: document.getElementById('new-fullname').value,
+    password: document.getElementById('new-password').value
+  };
+  if(!body.username||!body.email||!body.password) {
+    document.getElementById('modal-alert').innerHTML='<div class="alert alert-red">Compila tutti i campi obbligatori</div>'; return;
+  }
+  const r = await apiFetch('/api/admin/v1/users', {method:'POST', body:JSON.stringify(body)});
+  if(r) { closeModal(); toast('Utente creato con successo'); loadUsers(); nav('users'); }
+}
+
+async function logout() {
+  await fetch('/logout', {method:'POST', credentials:'include'});
+  window.location = '/login';
+}
+
+// Auto-load dashboard
+loadDashboard();
 </script>
 </body>
 </html>
