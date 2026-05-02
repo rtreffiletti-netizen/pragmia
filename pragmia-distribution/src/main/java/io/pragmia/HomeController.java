@@ -8,11 +8,11 @@ public class HomeController {
 
     @GetMapping("/")
     public String home() {
-        return "redirect:/swagger-ui.html";
+        return "redirect:/admin/index.html";
     }
 
     @GetMapping("/dashboard")
     public String dashboard() {
-        return "redirect:/swagger-ui.html";
+        return "redirect:/admin/index.html";
     }
 }

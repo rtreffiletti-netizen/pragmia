@@ -52,7 +52,7 @@ public class LoginController {
                 session.setAttribute(
                     HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY,
                     SecurityContextHolder.getContext());
-                return "redirect:/";
+                return "redirect:/admin/index.html";
             }
 
             if (result.isPending()) {

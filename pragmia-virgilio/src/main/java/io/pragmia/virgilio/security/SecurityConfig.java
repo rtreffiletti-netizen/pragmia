@@ -24,9 +24,8 @@ public class SecurityConfig {
     @Bean @Order(2)
     public SecurityFilterChain adminApiChain(HttpSecurity http) throws Exception {
         http.securityMatcher("/api/admin/**")
-            .authorizeHttpRequests(a -> a.anyRequest().hasAuthority("SCOPE_pragmia:admin"))
-            .oauth2ResourceServer(o -> o.jwt(j -> {}))
-            .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .authorizeHttpRequests(a -> a.anyRequest().authenticated())
+            .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
             .csrf(c -> c.disable());
         return http.build();
     }
@@ -36,7 +35,6 @@ public class SecurityConfig {
         http.authorizeHttpRequests(a -> a
                 .requestMatchers(PUBLIC_PATHS).permitAll()
                 .anyRequest().authenticated())
-            // Nessun formLogin: il POST /login è gestito da LoginController + FlowEngine
             .logout(l -> l
                 .logoutUrl("/logout")
                 .logoutSuccessUrl("/login?logout=true")
