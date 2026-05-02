@@ -29,8 +29,7 @@ spring:
       classpath:db/migration/minos,
       classpath:db/migration/luce
     baseline-on-migrate: true
-    repair-on-migrate: true
-    out-of-order: true
+    validate-on-migrate: false
 
   data:
     redis:
