@@ -1,1 +1,2 @@
-
+-- DEPRECATED: schema moved to V1.0.3__oidc_schema.sql
+-- This migration is intentionally left empty but present for Flyway ordering
