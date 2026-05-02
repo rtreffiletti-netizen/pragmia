@@ -87,3 +87,20 @@ logging:
   level:
     io.pragmia: DEBUG
     org.springframework.security: INFO
+
+    pragmia:
+  modules:
+    samlEnabled: true
+  saml:
+    idp:
+      enabled: true
+      entityId: https://localhost:8080/saml/idp
+      ssoUrl: /saml/idp/sso
+      sloUrl: /saml/idp/slo
+      certificate: classpath:certs/saml-idp.crt
+      privateKey: classpath:certs/saml-idp.key
+    sps:
+      - entityId: https://app1.example.com/saml/sp
+        assertionConsumerServiceUrl: https://app1.example.com/saml/acs
+        singleLogoutServiceUrl: https://app1.example.com/saml/slo
+        jitProvisioning: true
