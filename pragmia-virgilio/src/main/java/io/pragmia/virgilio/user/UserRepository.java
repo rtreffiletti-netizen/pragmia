@@ -26,4 +26,7 @@ public interface UserRepository extends JpaRepository<VirgilioUser, UUID> {
     @Modifying
     @Query("UPDATE VirgilioUser u SET u.locked = true WHERE u.id = :id")
     void lockUser(UUID id);
+
+    long countByEnabled(boolean enabled);
+    long countByLocked(boolean locked);
 }
