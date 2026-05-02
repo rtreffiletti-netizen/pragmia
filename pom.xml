@@ -34,6 +34,7 @@
     <module>pragmia-beatrice</module>
     <module>pragmia-minos</module>
     <module>pragmia-luce</module>
+             <module>pragmia-saml</module>
     <module>pragmia-sibilla</module>
     <module>pragmia-distribution</module>
   </modules>
