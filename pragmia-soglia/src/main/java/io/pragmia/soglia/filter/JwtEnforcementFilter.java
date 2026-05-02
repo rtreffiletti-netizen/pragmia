@@ -17,6 +17,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 
 @Component
@@ -37,25 +38,25 @@ public class JwtEnforcementFilter extends OncePerRequestFilter {
             return;
         }
 
-        var policyRequest = PolicyRequest.builder()
-            .subject(jwt.getSubject())
-            .resource(request.getRequestURI())
-            .action(request.getMethod())
-            .environment(Map.of(
-                "remoteIp", request.getRemoteAddr(),
-                "scopes",   jwt.getClaimAsStringList("scope") != null
-                                ? jwt.getClaimAsStringList("scope") : java.util.List.of()
-            ))
-            .claims(jwt.getClaims())
-            .build();
+        List<Object> scopesList = jwt.getClaimAsStringList("scope") != null
+            ? List.copyOf(jwt.getClaimAsStringList("scope")) : List.of();
+
+        var policyRequest = new PolicyRequest(
+            jwt.getSubject(),
+            Map.of("claims", jwt.getClaims()),
+            request.getRequestURI(),
+            request.getMethod(),
+            Map.of("remoteIp", request.getRemoteAddr(), "scopes", scopesList)
+        );
 
         var decision = policyEvaluator.evaluate(policyRequest);
 
-        if (decision == PolicyDecision.DENY) {
+        if (decision != null && decision.effect() == PolicyDecision.Effect.DENY) {
             log.warn("[SOGLIA] DENY {} {} subject={}", request.getMethod(), request.getRequestURI(), jwt.getSubject());
             audit.publish(AuditEventType.POLICY_EVALUATED_DENY, jwt.getSubject(),
-                null, null, null, request.getRequestURI(), request.getMethod(),
-                "DENY", "policy deny", Map.of("ip", request.getRemoteAddr()));
+                null, null, request.getRemoteAddr(),
+                request.getRequestURI(), request.getMethod(),
+                "DENY", decision.reason(), Map.of("ip", request.getRemoteAddr()));
             response.sendError(HttpServletResponse.SC_FORBIDDEN, "Access denied by policy");
             return;
         }

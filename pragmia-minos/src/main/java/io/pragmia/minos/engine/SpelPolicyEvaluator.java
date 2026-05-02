@@ -29,25 +29,27 @@ public class SpelPolicyEvaluator implements PolicyEvaluator {
         for (Policy policy : policies) {
             try {
                 var ctx = new StandardEvaluationContext();
-                ctx.setVariable("subject",     request.getSubject());
-                ctx.setVariable("resource",    request.getResource());
-                ctx.setVariable("action",      request.getAction());
-                ctx.setVariable("environment", request.getEnvironment());
-                ctx.setVariable("claims",      request.getClaims());
+                ctx.setVariable("subjectId",          request.subjectId());
+                ctx.setVariable("subjectAttributes",  request.subjectAttributes());
+                ctx.setVariable("resource",           request.resource());
+                ctx.setVariable("action",             request.action());
+                ctx.setVariable("context",            request.contextAttributes());
+                ctx.setVariable("claims",
+                    request.subjectAttributes() != null ? request.subjectAttributes() : java.util.Map.of());
 
                 Boolean match = parser.parseExpression(policy.getCondition())
                                       .getValue(ctx, Boolean.class);
                 if (Boolean.TRUE.equals(match)) {
                     log.debug("[MINOS] Policy '{}' matched → {}", policy.getName(), policy.getEffect());
                     return policy.getEffect() == PolicyEffect.PERMIT
-                        ? PolicyDecision.PERMIT
-                        : PolicyDecision.DENY;
+                        ? PolicyDecision.permit(getName())
+                        : PolicyDecision.deny("Matched policy: " + policy.getName(), getName());
                 }
             } catch (Exception ex) {
                 log.warn("[MINOS] Error evaluating policy '{}': {}", policy.getName(), ex.getMessage());
             }
         }
-        return PolicyDecision.PERMIT; // default permissive se nessuna policy corrisponde
+        return PolicyDecision.permit(getName()); // default permissive
     }
 
     @Override

@@ -36,7 +36,7 @@ public class FlowAuthService {
 
         AuditEventType eventType = result.isAllowed() ? AuditEventType.AUTH_SUCCESS : AuditEventType.AUTH_FAILURE;
         audit.publish(new AuditEvent(UUID.randomUUID().toString(), eventType, Instant.now(),
-            result.getUserId(), null, sessionId, clientId, remoteIp, "LOGIN", "AUTHENTICATE",
+            result.userId(), null, sessionId, clientId, remoteIp, "LOGIN", "AUTHENTICATE",
             result.isAllowed() ? "SUCCESS" : "FAILURE",
             result.isDenied() ? result.denyReason() : null,
             Map.of("username", username != null ? username : "")));

@@ -76,6 +76,6 @@ public class PolicyController {
     @Operation(summary = "Test-evaluate a policy request")
     public Map<String, Object> evaluate(@RequestBody PolicyRequest request) {
         PolicyDecision decision = evaluator.evaluate(request);
-        return Map.of("decision", decision.name());
+        return Map.of("decision", decision.effect().name(), "reason", decision.reason() != null ? decision.reason() : "");
     }
 }

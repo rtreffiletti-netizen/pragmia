@@ -51,7 +51,7 @@ public class OllamaClient {
             return "{}";
         } catch (Exception e) {
             log.error("[BEATRICE] Ollama error: {}", e.getMessage());
-            return "{"error": "" + e.getMessage() + ""}";
+            return "{\"error\": \"" + e.getMessage() + "\"}";
         }
     }
 }
