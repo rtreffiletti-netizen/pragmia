@@ -1,3 +1,4 @@
+
 package io.pragmia.virgilio.oauth.model;
 
 import jakarta.persistence.*;
@@ -8,7 +9,9 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "oauth_refresh_tokens", indexes = {
-    @Index(name = "idx_token_value_rt", columnList = "tokenValue", unique = true)
+    @Index(name = "idx_token_value_rt", columnList = "tokenValue", unique = true),
+    @Index(name = "idx_rt_user_id",     columnList = "userId"),
+    @Index(name = "idx_rt_client_id",   columnList = "clientId")
 })
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
 public class OAuthRefreshToken {
@@ -34,6 +37,10 @@ public class OAuthRefreshToken {
 
     @Column(nullable = false)
     private Instant expiresAt;
+
+    /** Collegamento all'access token emesso contestualmente (per revoca in cascata) */
+    @Column
+    private UUID accessTokenId;
 
     @Column(nullable = false)
     private boolean revoked = false;
