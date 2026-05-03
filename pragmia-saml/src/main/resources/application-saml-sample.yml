@@ -1,0 +1,53 @@
+# PRAGMIA SAML — Configurazione di esempio
+# Copiare i valori necessari nell'application.yml principale
+
+pragmia:
+  modules:
+    saml:
+      enabled: true
+
+  saml:
+    idp:
+      entity-id: "https://auth.example.com/saml/idp"
+      keystore-path: "classpath:saml/pragmia-saml.jks"
+      keystore-password: "${PRAGMIA_SAML_KEYSTORE_PASSWORD}"
+      key-alias: "pragmia-saml"
+      key-password: "${PRAGMIA_SAML_KEY_PASSWORD}"
+      sso-session-max-age: 28800  # 8 ore
+      trusted-sps:
+        - entity-id: "https://myapp.example.com"
+          acs-url: "https://myapp.example.com/saml/acs"
+          name: "MyApp"
+
+    sp:
+      entity-id: "https://auth.example.com/saml/sp"
+      external-idps:
+        # Azure AD
+        - registration-id: "azuread"
+          entity-id: "https://sts.windows.net/{tenant-id}/"
+          metadata-url: "https://login.microsoftonline.com/{tenant-id}/federationmetadata/2007-06/federationmetadata.xml"
+          name: "Azure Active Directory"
+          type: "azuread"
+        # ADFS on-premise
+        - registration-id: "adfs"
+          entity-id: "https://adfs.example.com/adfs"
+          metadata-url: "https://adfs.example.com/FederationMetadata/2007-06/FederationMetadata.xml"
+          name: "ADFS Corporate"
+          type: "adfs"
+        # SPID (PA italiana)
+        - registration-id: "spid-test"
+          entity-id: "https://spidsaml.test.poste.it"
+          metadata-url: "https://spid.agid.gov.it/metadata/idp-list.xml"
+          name: "SPID Test IdP"
+          type: "spid"
+
+spring:
+  security:
+    saml2:
+      relyingparty:
+        registration:
+          azuread:
+            signing:
+              credentials:
+                - private-key-location: "classpath:saml/sp-signing.key"
+                  certificate-location: "classpath:saml/sp-signing.crt"
