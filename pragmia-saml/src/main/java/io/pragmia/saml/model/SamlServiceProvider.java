@@ -1,25 +1,50 @@
 package io.pragmia.saml.model;
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.Data;
 import java.time.Instant;
-import java.util.UUID;
 
+@Data
 @Entity
-@Table(name = "pragmia_saml_sp")
-@Getter @Setter @NoArgsConstructor
+@Table(name = "pragmia_saml_service_providers")
 public class SamlServiceProvider {
-    @Id @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
-    @Column(nullable = false) private String name;
-    @Column(nullable = false, unique = true) private String entityId;
-    @Column private String acsUrl;
-    @Column private String logoutUrl;
-    @Column(columnDefinition = "TEXT") private String metadata;
-    @Column private String attributeMapping;
-    @Column(nullable = false) private boolean jitProvisioning = true;
-    @Column(nullable = false) private boolean active = true;
-    @Column(nullable = false) private Instant createdAt = Instant.now();
-    @Column(nullable = false) private Instant updatedAt = Instant.now();
-    @PreUpdate public void preUpdate() { updatedAt = Instant.now(); }
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private String id;
+
+    @Column(nullable = false, unique = true)
+    private String entityId;
+
+    @Column(nullable = false)
+    private String name;
+
+    @Column(nullable = false)
+    private String acsUrl;
+
+    private String sloUrl;
+    private String metadataUrl;
+
+    /** Certificato X.509 PEM per verifica firma richieste */
+    @Column(columnDefinition = "TEXT")
+    private String signingCertificate;
+
+    /** Attributi da includere nell'assertion (CSV) */
+    private String attributeMapping;
+
+    /** Flusso consentito: sp-initiated | idp-initiated | both */
+    @Column(nullable = false)
+    private String allowedFlow = "both";
+
+    private boolean enabled = true;
+    private boolean requireSignedRequests = true;
+    private boolean encryptAssertions = false;
+
+    @Column(nullable = false, updatable = false)
+    private Instant createdAt = Instant.now();
+
+    private Instant updatedAt;
+
+    @PreUpdate
+    void onUpdate() { this.updatedAt = Instant.now(); }
 }
