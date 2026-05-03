@@ -1,0 +1,1458 @@
+<!DOCTYPE html>
+<html lang="it" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PRAGMIA — Admin Console</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+
+/* ═══════════════════════════════════════
+   TEMA SCURO (default)
+═══════════════════════════════════════ */
+[data-theme="dark"] {
+  --bg-app:       #1a1d23;
+  --bg-sidebar:   #15171d;
+  --bg-surface:   #1f2229;
+  --bg-elevated:  #262931;
+  --bg-hover:     #2a2d38;
+  --bg-selected:  #252a3a;
+  --border:       #2e323e;
+  --border-soft:  #252830;
+
+  --text-primary:   #dde1ea;
+  --text-secondary: #8e95a3;
+  --text-muted:     #5c6270;
+  --text-inverse:   #ffffff;
+
+  --accent:       #4a7fd4;
+  --accent-hover: #5a8fe4;
+  --accent-dim:   rgba(74,127,212,.12);
+  --accent-border:rgba(74,127,212,.3);
+
+  --ok:     #4caf7d;
+  --warn:   #c9953a;
+  --error:  #d95f5f;
+  --info:   #4a7fd4;
+  --purple: #8b6fc9;
+
+  --ok-dim:    rgba(76,175,125,.1);
+  --warn-dim:  rgba(201,149,58,.1);
+  --error-dim: rgba(217,95,95,.1);
+
+  --shadow: 0 2px 12px rgba(0,0,0,.4);
+  --shadow-lg: 0 4px 24px rgba(0,0,0,.5);
+}
+
+/* ═══════════════════════════════════════
+   TEMA CHIARO
+═══════════════════════════════════════ */
+[data-theme="light"] {
+  --bg-app:       #f0f2f5;
+  --bg-sidebar:   #ffffff;
+  --bg-surface:   #ffffff;
+  --bg-elevated:  #f5f6f8;
+  --bg-hover:     #eef0f4;
+  --bg-selected:  #e8edf7;
+  --border:       #dde1e9;
+  --border-soft:  #e8eaef;
+
+  --text-primary:   #1a1d23;
+  --text-secondary: #4a5060;
+  --text-muted:     #8e95a3;
+  --text-inverse:   #ffffff;
+
+  --accent:       #2f64b5;
+  --accent-hover: #2257a0;
+  --accent-dim:   rgba(47,100,181,.08);
+  --accent-border:rgba(47,100,181,.25);
+
+  --ok:     #2e7d52;
+  --warn:   #a06020;
+  --error:  #b84040;
+  --info:   #2f64b5;
+  --purple: #6b4fa8;
+
+  --ok-dim:    rgba(46,125,82,.08);
+  --warn-dim:  rgba(160,96,32,.08);
+  --error-dim: rgba(184,64,64,.08);
+
+  --shadow: 0 1px 6px rgba(0,0,0,.08);
+  --shadow-lg: 0 4px 16px rgba(0,0,0,.12);
+}
+
+/* ═══════════════════════════════════════
+   RESET & BASE
+═══════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  background: var(--bg-app);
+  color: var(--text-primary);
+  font-size: 13.5px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+}
+
+--radius: 6px;
+--sidebar-w: 240px;
+--topbar-h: 52px;
+
+/* ═══════════════════════════════════════
+   LAYOUT
+═══════════════════════════════════════ */
+.layout { display: flex; min-height: 100vh; }
+
+/* ═══════════════════════════════════════
+   SIDEBAR
+═══════════════════════════════════════ */
+.sidebar {
+  width: 240px;
+  min-width: 240px;
+  background: var(--bg-sidebar);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  top: 0; left: 0;
+  height: 100vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  z-index: 100;
+}
+
+.sidebar-logo {
+  padding: 18px 20px 14px;
+  border-bottom: 1px solid var(--border);
+}
+.logo-brand {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: .3px;
+}
+.logo-sub {
+  font-size: 10.5px;
+  color: var(--text-muted);
+  margin-top: 2px;
+  font-style: italic;
+  font-weight: 400;
+}
+
+.realm-pill {
+  margin: 10px 12px 4px;
+  padding: 7px 12px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.realm-pill:hover { border-color: var(--accent-border); }
+.realm-pill-label { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: .8px; }
+.realm-pill-value { font-size: 13px; font-weight: 600; color: var(--text-primary); margin-top: 1px; }
+.realm-pill-caret { font-size: 9px; color: var(--text-muted); }
+
+.nav-section { padding: 4px 0; }
+.nav-section-label {
+  padding: 12px 20px 4px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text-muted);
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 7px 12px 7px 20px;
+  margin: 1px 8px;
+  border-radius: 5px;
+  cursor: pointer;
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 450;
+  transition: background .1s, color .1s;
+  text-decoration: none;
+  gap: 8px;
+}
+.nav-item:hover  { background: var(--bg-hover); color: var(--text-primary); }
+.nav-item.active {
+  background: var(--accent-dim);
+  color: var(--accent);
+  font-weight: 600;
+  border-left: 2px solid var(--accent);
+  padding-left: 18px;
+}
+
+.nav-item-text { flex: 1; }
+
+.nav-badge {
+  font-size: 10px; font-weight: 700;
+  padding: 1px 6px; border-radius: 10px;
+  background: var(--error); color: #fff;
+  flex-shrink: 0;
+}
+.nav-badge.warn   { background: var(--warn); }
+.nav-badge.blue   { background: var(--accent); }
+.nav-badge.purple { background: var(--purple); }
+
+.nav-tag {
+  font-size: 9px; font-weight: 700;
+  padding: 1px 5px; border-radius: 3px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  letter-spacing: .5px;
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+.nav-tag.ent { border-color: var(--accent-border); color: var(--accent); background: var(--accent-dim); }
+
+/* BEATRICE nav speciale */
+.nav-item.beatrice {
+  background: rgba(139,111,201,.08);
+  border-left: 2px solid var(--purple);
+  padding-left: 18px;
+  color: var(--purple);
+  font-weight: 600;
+  margin-top: 2px;
+}
+.nav-item.beatrice:hover { background: rgba(139,111,201,.14); }
+
+.sidebar-footer {
+  margin-top: auto;
+  padding: 12px 16px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.avatar-sm {
+  width: 30px; height: 30px; border-radius: 50%;
+  background: var(--accent);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 700; color: #fff;
+  flex-shrink: 0;
+}
+.user-name-sm { font-size: 12.5px; font-weight: 600; }
+.user-role-sm { font-size: 11px; color: var(--text-muted); }
+.btn-icon {
+  margin-left: auto;
+  background: none; border: none;
+  color: var(--text-muted); cursor: pointer;
+  font-size: 14px; padding: 4px;
+  border-radius: 4px;
+  transition: color .1s, background .1s;
+}
+.btn-icon:hover { color: var(--text-primary); background: var(--bg-hover); }
+
+/* ═══════════════════════════════════════
+   TOPBAR
+═══════════════════════════════════════ */
+.topbar {
+  position: fixed;
+  top: 0; left: 240px; right: 0;
+  height: 52px;
+  background: var(--bg-surface);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 24px;
+  gap: 16px;
+  z-index: 90;
+}
+.topbar-title { font-size: 15px; font-weight: 600; flex: 1; }
+.topbar-breadcrumb { font-size: 12px; color: var(--text-muted); font-weight: 400; margin-left: 6px; }
+
+.search-field {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 5px 11px;
+  width: 260px;
+  transition: border-color .15s;
+}
+.search-field:hover, .search-field:focus-within { border-color: var(--accent-border); }
+.search-field input {
+  border: none; background: none; color: var(--text-primary);
+  font-family: 'Inter', sans-serif; font-size: 13px; outline: none; width: 100%;
+}
+.search-field input::placeholder { color: var(--text-muted); }
+.search-kbd {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  background: var(--bg-hover);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 1px 5px;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.status-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--ok);
+  box-shadow: 0 0 5px var(--ok);
+  animation: blink 2.5s infinite;
+  flex-shrink: 0;
+}
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.4} }
+.status-label { font-size: 12px; color: var(--text-secondary); }
+
+.theme-toggle {
+  display: flex;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  overflow: hidden;
+}
+.theme-btn {
+  padding: 5px 10px;
+  background: none; border: none;
+  font-size: 12px; font-weight: 500;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: background .1s, color .1s;
+}
+.theme-btn.active { background: var(--accent); color: #fff; }
+
+.topbar-btn {
+  padding: 5px 12px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  font-size: 12.5px; font-weight: 500;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: border-color .1s, color .1s;
+}
+.topbar-btn:hover { border-color: var(--accent-border); color: var(--text-primary); }
+.topbar-btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+.topbar-btn.primary:hover { background: var(--accent-hover); }
+
+.notif-wrap { position: relative; }
+.notif-dot {
+  position: absolute; top: -3px; right: -3px;
+  width: 14px; height: 14px; border-radius: 50%;
+  background: var(--error);
+  font-size: 8px; font-weight: 700; color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  border: 2px solid var(--bg-surface);
+}
+
+/* ═══════════════════════════════════════
+   MAIN
+═══════════════════════════════════════ */
+.main {
+  margin-left: 240px;
+  padding-top: 52px;
+  min-height: 100vh;
+}
+.content { padding: 22px 24px; max-width: 1440px; }
+
+/* ═══════════════════════════════════════
+   BEATRICE PANEL
+═══════════════════════════════════════ */
+.beatrice-panel {
+  background: var(--bg-surface);
+  border: 1px solid rgba(139,111,201,.35);
+  border-radius: 6px;
+  margin-bottom: 22px;
+  overflow: hidden;
+}
+.beatrice-header {
+  padding: 12px 18px;
+  border-bottom: 1px solid rgba(139,111,201,.2);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(139,111,201,.05);
+}
+.beatrice-title-main { font-size: 13.5px; font-weight: 700; color: var(--purple); }
+.beatrice-subtitle   { font-size: 11.5px; color: var(--text-muted); margin-top: 1px; }
+.beatrice-ent-tag {
+  margin-left: auto;
+  font-size: 10px; font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 3px;
+  background: var(--purple);
+  color: #fff;
+  letter-spacing: .5px;
+}
+
+.beatrice-body { padding: 14px 18px 16px; }
+
+.beatrice-input-row { display: flex; gap: 8px; }
+.beatrice-input {
+  flex: 1;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 9px 14px;
+  color: var(--text-primary);
+  font-family: 'Inter', sans-serif;
+  font-size: 13.5px;
+  outline: none;
+  transition: border-color .15s;
+}
+.beatrice-input:focus { border-color: rgba(139,111,201,.6); }
+.beatrice-input::placeholder { color: var(--text-muted); }
+
+.beatrice-submit {
+  padding: 9px 18px;
+  background: var(--purple);
+  border: none; border-radius: 5px;
+  color: #fff;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px; font-weight: 600;
+  cursor: pointer;
+  transition: opacity .15s;
+  white-space: nowrap;
+}
+.beatrice-submit:hover { opacity: .88; }
+
+.beatrice-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.b-chip {
+  padding: 4px 11px;
+  background: rgba(139,111,201,.08);
+  border: 1px solid rgba(139,111,201,.2);
+  border-radius: 20px;
+  font-size: 12px;
+  color: var(--purple);
+  cursor: pointer;
+  transition: background .1s;
+}
+.b-chip:hover { background: rgba(139,111,201,.15); }
+
+.beatrice-response {
+  margin-top: 14px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 13px 16px;
+}
+.b-resp-label { font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .8px; color: var(--purple); margin-bottom: 8px; }
+.b-resp-text  { font-size: 13.5px; color: var(--text-primary); line-height: 1.65; }
+.b-resp-text code {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  background: var(--bg-hover);
+  padding: 1px 5px;
+  border-radius: 3px;
+  color: var(--warn);
+}
+
+.intent-review {
+  margin-top: 12px;
+  padding: 11px 14px;
+  background: rgba(201,149,58,.07);
+  border: 1px solid rgba(201,149,58,.25);
+  border-radius: 5px;
+}
+.intent-label { font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .7px; color: var(--warn); margin-bottom: 6px; }
+.intent-text  { font-size: 13px; color: var(--text-primary); }
+.intent-actions { display: flex; gap: 8px; margin-top: 10px; align-items: center; }
+.btn-confirm { padding: 5px 14px; background: var(--ok); border: none; border-radius: 4px; color: #fff; font-size: 12.5px; font-weight: 600; cursor: pointer; }
+.btn-cancel  { padding: 5px 14px; background: none; border: 1px solid var(--border); border-radius: 4px; color: var(--text-secondary); font-size: 12.5px; cursor: pointer; }
+.dual-tag {
+  margin-left: auto;
+  font-size: 10.5px; font-weight: 700;
+  padding: 2px 8px; border-radius: 3px;
+  background: var(--error-dim);
+  border: 1px solid rgba(217,95,95,.3);
+  color: var(--error);
+}
+
+/* ═══════════════════════════════════════
+   KPI STRIP
+═══════════════════════════════════════ */
+.kpi-strip {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin-bottom: 22px;
+}
+.kpi-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 16px 18px;
+  transition: border-color .15s;
+}
+.kpi-card:hover { border-color: var(--accent-border); }
+.kpi-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .7px; color: var(--text-muted); margin-bottom: 10px; }
+.kpi-value { font-size: 28px; font-weight: 700; line-height: 1; color: var(--text-primary); }
+.kpi-sub   { font-size: 11.5px; color: var(--text-muted); margin-top: 5px; }
+.kpi-sub .up   { color: var(--ok); font-weight: 600; }
+.kpi-sub .down { color: var(--error); font-weight: 600; }
+.kpi-sub .warn { color: var(--warn); font-weight: 600; }
+.kpi-accent { display: inline-block; width: 3px; height: 24px; border-radius: 2px; vertical-align: middle; margin-right: 8px; }
+
+/* ═══════════════════════════════════════
+   CARD
+═══════════════════════════════════════ */
+.card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+}
+.card-header {
+  padding: 13px 18px 11px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 10px;
+}
+.card-title    { font-size: 13.5px; font-weight: 700; }
+.card-subtitle { font-size: 11.5px; color: var(--text-muted); }
+.card-actions  { margin-left: auto; display: flex; gap: 6px; }
+.card-body     { padding: 14px 18px; }
+
+/* ═══════════════════════════════════════
+   BUTTONS
+═══════════════════════════════════════ */
+.btn {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 5px 12px;
+  border-radius: 4px;
+  font-family: 'Inter', sans-serif;
+  font-size: 12.5px; font-weight: 500;
+  cursor: pointer; border: none;
+  transition: opacity .15s;
+}
+.btn.primary { background: var(--accent); color: #fff; }
+.btn.primary:hover { background: var(--accent-hover); }
+.btn.ghost {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+}
+.btn.ghost:hover { border-color: var(--accent-border); color: var(--text-primary); }
+.btn.danger { background: var(--error); color: #fff; }
+
+/* ═══════════════════════════════════════
+   TABLE
+═══════════════════════════════════════ */
+.tbl-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+thead th {
+  padding: 9px 14px;
+  text-align: left;
+  font-size: 10.5px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .6px;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-elevated);
+  white-space: nowrap;
+}
+tbody tr { border-bottom: 1px solid var(--border-soft); transition: background .08s; }
+tbody tr:hover { background: var(--bg-hover); }
+tbody tr:last-child { border-bottom: none; }
+tbody td { padding: 10px 14px; vertical-align: middle; }
+
+.u-cell { display: flex; align-items: center; gap: 9px; }
+.u-av {
+  width: 28px; height: 28px; border-radius: 50%;
+  background: var(--accent);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700; color: #fff;
+  flex-shrink: 0;
+}
+.u-name  { font-size: 13px; font-weight: 600; }
+.u-email { font-size: 11px; color: var(--text-muted); }
+
+/* ═══════════════════════════════════════
+   CHIP / BADGE
+═══════════════════════════════════════ */
+.chip {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 2px 8px; border-radius: 3px;
+  font-size: 11.5px; font-weight: 600;
+}
+.chip.ok     { background: var(--ok-dim);    color: var(--ok);    border: 1px solid rgba(76,175,125,.2);  }
+.chip.err    { background: var(--error-dim); color: var(--error); border: 1px solid rgba(217,95,95,.2);  }
+.chip.warn   { background: var(--warn-dim);  color: var(--warn);  border: 1px solid rgba(201,149,58,.2); }
+.chip.blue   { background: var(--accent-dim);color: var(--accent);border: 1px solid var(--accent-border);}
+.chip.gray   { background: var(--bg-elevated);color:var(--text-secondary);border:1px solid var(--border);}
+.chip.purple { background: rgba(139,111,201,.1); color:var(--purple); border:1px solid rgba(139,111,201,.2);}
+
+/* ═══════════════════════════════════════
+   ACTIVITY FEED
+═══════════════════════════════════════ */
+.feed-item {
+  display: flex; gap: 12px; align-items: flex-start;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--border-soft);
+  font-size: 12.5px;
+}
+.feed-item:last-child { border-bottom: none; }
+.feed-dot {
+  width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; margin-top: 4px;
+}
+.feed-dot.ok   { background: var(--ok); }
+.feed-dot.err  { background: var(--error); }
+.feed-dot.warn { background: var(--warn); }
+.feed-dot.blue { background: var(--accent); }
+.feed-dot.nlp  { background: var(--purple); }
+.feed-msg { flex: 1; color: var(--text-primary); line-height: 1.5; }
+.feed-msg .hl { color: var(--accent); font-weight: 600; }
+.feed-sub { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+.feed-time { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-muted); white-space: nowrap; }
+
+/* ═══════════════════════════════════════
+   COMPLIANCE BARS
+═══════════════════════════════════════ */
+.comp-row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 9px 0; border-bottom: 1px solid var(--border-soft);
+}
+.comp-row:last-child { border-bottom: none; }
+.comp-name { font-size: 12.5px; font-weight: 600; width: 50px; flex-shrink: 0; }
+.comp-track { flex: 1; height: 6px; background: var(--bg-elevated); border-radius: 3px; overflow: hidden; }
+.comp-fill  { height: 100%; border-radius: 3px; }
+.comp-pct   { font-size: 12.5px; font-weight: 700; width: 36px; text-align: right; flex-shrink: 0; }
+.comp-chg   { font-size: 11px; color: var(--text-muted); width: 40px; text-align: right; flex-shrink: 0; }
+
+/* ═══════════════════════════════════════
+   MODULE STATUS GRID
+═══════════════════════════════════════ */
+.mod-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.mod-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 10px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  font-size: 12.5px;
+}
+.mod-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+.mod-name { flex: 1; font-weight: 600; }
+.mod-tier { font-size: 10px; color: var(--text-muted); font-weight: 400; }
+.mod-state { font-size: 11px; font-weight: 700; }
+
+/* ═══════════════════════════════════════
+   CANTO EDITOR MOCKUP
+═══════════════════════════════════════ */
+.canto-panel {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  margin-bottom: 22px;
+  overflow: hidden;
+}
+
+.canto-layout { display: flex; height: 380px; }
+
+/* Palette nodi — sinistra */
+.canto-palette {
+  width: 190px;
+  border-right: 1px solid var(--border);
+  background: var(--bg-elevated);
+  padding: 10px 0;
+  overflow-y: auto;
+  flex-shrink: 0;
+}
+.pal-section-label {
+  padding: 8px 12px 4px;
+  font-size: 10px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .8px;
+  color: var(--text-muted);
+}
+.pal-node {
+  margin: 2px 8px;
+  padding: 6px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  cursor: grab;
+  transition: border-color .1s, color .1s;
+  display: flex; align-items: center; gap: 8px;
+}
+.pal-node:hover { border-color: var(--accent-border); color: var(--text-primary); }
+.pal-node-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.pal-node.script {
+  border-style: dashed;
+  color: var(--purple);
+  border-color: rgba(139,111,201,.35);
+}
+.pal-node.script:hover { border-color: rgba(139,111,201,.6); }
+
+/* Canvas — centro */
+.canto-canvas {
+  flex: 1;
+  background:
+    linear-gradient(var(--border-soft) 1px, transparent 1px),
+    linear-gradient(90deg, var(--border-soft) 1px, transparent 1px);
+  background-size: 28px 28px;
+  background-color: var(--bg-app);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Nodi nel canvas */
+.c-node {
+  position: absolute;
+  background: var(--bg-surface);
+  border: 1.5px solid var(--border);
+  border-radius: 5px;
+  padding: 8px 14px;
+  font-size: 12px; font-weight: 600;
+  cursor: pointer;
+  box-shadow: var(--shadow);
+  min-width: 110px;
+  text-align: center;
+  transition: border-color .1s, box-shadow .1s;
+}
+.c-node:hover { box-shadow: var(--shadow-lg); }
+.c-node-type { font-size: 10px; font-weight: 400; color: var(--text-muted); margin-bottom: 3px; text-transform: uppercase; letter-spacing: .5px; }
+.c-node-label { font-size: 13px; font-weight: 600; }
+
+.c-node.start  { border-color: var(--ok); }
+.c-node.auth   { border-color: var(--accent); }
+.c-node.mfa    { border-color: var(--purple); }
+.c-node.cond   { border-color: var(--warn); border-style: dashed; }
+.c-node.allow  { border-color: var(--ok); background: var(--ok-dim); }
+.c-node.deny   { border-color: var(--error); background: var(--error-dim); }
+.c-node.script-n { border-color: var(--purple); border-style: dashed; background: rgba(139,111,201,.06); }
+
+/* Connettori SVG */
+.canto-svg {
+  position: absolute; top: 0; left: 0;
+  width: 100%; height: 100%;
+  pointer-events: none;
+}
+
+/* Toolbar canvas */
+.canto-toolbar {
+  position: absolute; top: 10px; right: 10px;
+  display: flex; gap: 4px;
+}
+.c-tool-btn {
+  padding: 4px 10px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-size: 11.5px; font-weight: 500;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+.c-tool-btn:hover { border-color: var(--accent-border); color: var(--text-primary); }
+
+/* Inspector — destra */
+.canto-inspector {
+  width: 210px;
+  border-left: 1px solid var(--border);
+  background: var(--bg-elevated);
+  padding: 12px;
+  overflow-y: auto;
+  flex-shrink: 0;
+}
+.insp-title { font-size: 12px; font-weight: 700; margin-bottom: 12px; text-transform: uppercase; letter-spacing: .7px; color: var(--text-muted); }
+.insp-field { margin-bottom: 10px; }
+.insp-label { font-size: 10.5px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: .6px; margin-bottom: 4px; }
+.insp-input {
+  width: 100%;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 5px 8px;
+  color: var(--text-primary);
+  font-family: 'Inter', sans-serif;
+  font-size: 12.5px;
+  outline: none;
+}
+.insp-input:focus { border-color: var(--accent-border); }
+.insp-textarea {
+  width: 100%; min-height: 70px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 5px 8px;
+  color: var(--text-primary);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11.5px;
+  outline: none; resize: vertical;
+}
+.insp-textarea:focus { border-color: rgba(139,111,201,.5); }
+.insp-script-label {
+  font-size: 10.5px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .6px;
+  color: var(--purple);
+  margin-bottom: 4px;
+}
+.insp-divider { border: none; border-top: 1px solid var(--border); margin: 12px 0; }
+.insp-select {
+  width: 100%;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 5px 8px;
+  color: var(--text-primary);
+  font-family: 'Inter', sans-serif;
+  font-size: 12.5px;
+  outline: none;
+}
+
+/* ═══════════════════════════════════════
+   SECTION GRID
+═══════════════════════════════════════ */
+.grid-2-1 { display: grid; grid-template-columns: 2fr 1fr; gap: 18px; margin-bottom: 20px; }
+.grid-3   { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 18px; margin-bottom: 20px; }
+.grid-2   { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 20px; }
+
+/* ═══════════════════════════════════════
+   FOOTER
+═══════════════════════════════════════ */
+.footer {
+  padding: 14px 0 4px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  font-size: 11.5px;
+  color: var(--text-muted);
+}
+
+/* ═══════════════════════════════════════
+   SCROLLBAR
+═══════════════════════════════════════ */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+</style>
+</head>
+<body>
+<div class="layout">
+
+<!-- ══════════════════════ SIDEBAR ══════════════════════ -->
+<nav class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-brand">PRAGMIA</div>
+    <div class="logo-sub">Policy Rights Access Governance Management Intelligence Architecture</div>
+  </div>
+
+  <div class="realm-pill">
+    <div>
+      <div class="realm-pill-label">Realm attivo</div>
+      <div class="realm-pill-value">master</div>
+    </div>
+    <span class="realm-pill-caret">▼</span>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-label">Panoramica</div>
+    <div class="nav-item active"><span class="nav-item-text">Dashboard</span></div>
+    <div class="nav-item"><span class="nav-item-text">Alert e Notifiche</span><span class="nav-badge">3</span></div>
+    <div class="nav-item"><span class="nav-item-text">System Status</span></div>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-label">Identità</div>
+    <div class="nav-item"><span class="nav-item-text">Utenti</span><span class="nav-badge warn">4</span></div>
+    <div class="nav-item"><span class="nav-item-text">Gruppi</span></div>
+    <div class="nav-item"><span class="nav-item-text">Ruoli e Permessi</span></div>
+    <div class="nav-item"><span class="nav-item-text">LDAP / Active Directory</span></div>
+    <div class="nav-item"><span class="nav-item-text">MFA e TOTP</span></div>
+    <div class="nav-item"><span class="nav-item-text">Password Policy</span></div>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-label">Protocolli</div>
+    <div class="nav-item"><span class="nav-item-text">Client OAuth2 / OIDC</span><span class="nav-badge warn">3</span></div>
+    <div class="nav-item"><span class="nav-item-text">Service Provider SAML</span></div>
+    <div class="nav-item"><span class="nav-item-text">Identity Provider Esterni</span></div>
+    <div class="nav-item"><span class="nav-item-text">Token Management</span></div>
+    <div class="nav-item"><span class="nav-item-text">Token Revocation</span></div>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-label">Sessioni</div>
+    <div class="nav-item"><span class="nav-item-text">Sessioni Attive</span><span class="nav-badge blue">38</span></div>
+    <div class="nav-item"><span class="nav-item-text">Session Kill</span></div>
+    <div class="nav-item"><span class="nav-item-text">Geo e IP Insights</span></div>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-label">Flussi — CANTO</div>
+    <div class="nav-item"><span class="nav-item-text">Flow Editor</span></div>
+    <div class="nav-item"><span class="nav-item-text">Libreria Nodi</span></div>
+    <div class="nav-item"><span class="nav-item-text">Nodi Script</span><span class="nav-tag ent">ENT</span></div>
+    <div class="nav-item"><span class="nav-item-text">Import / Export YAML</span></div>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-label">Policy e Compliance</div>
+    <div class="nav-item"><span class="nav-item-text">Policy Engine — MINOS</span><span class="nav-tag ent">ENT</span></div>
+    <div class="nav-item"><span class="nav-item-text">Compliance — LUCE</span><span class="nav-tag ent">ENT</span></div>
+    <div class="nav-item"><span class="nav-item-text">DORA / NIS2 / GDPR</span><span class="nav-tag ent">ENT</span></div>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-label">Osservabilità — CLIO</div>
+    <div class="nav-item"><span class="nav-item-text">Audit Log</span></div>
+    <div class="nav-item"><span class="nav-item-text">Metriche</span></div>
+    <div class="nav-item"><span class="nav-item-text">Tracing Distribuito</span></div>
+    <div class="nav-item"><span class="nav-item-text">Anomaly Detection</span></div>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-label">Gateway — SOGLIA</div>
+    <div class="nav-item"><span class="nav-item-text">Route Configuration</span></div>
+    <div class="nav-item"><span class="nav-item-text">Policy Enforcement (PEP)</span></div>
+    <div class="nav-item"><span class="nav-item-text">Rate Limiting</span></div>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-label">Sicurezza Avanzata</div>
+    <div class="nav-item"><span class="nav-item-text">FIDO2 / WebAuthn</span><span class="nav-tag ent">ENT</span></div>
+    <div class="nav-item"><span class="nav-item-text">PAM Bridge</span><span class="nav-tag ent">ENT</span></div>
+    <div class="nav-item"><span class="nav-item-text">Certificate Authentication</span></div>
+    <div class="nav-item"><span class="nav-item-text">Risk Engine</span><span class="nav-tag ent">ENT</span></div>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-label">Amministrazione</div>
+    <div class="nav-item"><span class="nav-item-text">Configurazione Globale</span></div>
+    <div class="nav-item"><span class="nav-item-text">Licenza e Moduli</span></div>
+    <div class="nav-item"><span class="nav-item-text">Chiavi e Certificati</span></div>
+    <div class="nav-item"><span class="nav-item-text">API Documentation</span></div>
+    <div class="nav-item"><span class="nav-item-text">Deploy e Health</span></div>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-label">AI Admin — BEATRICE</div>
+    <div class="nav-item beatrice"><span class="nav-item-text">Prompt Naturale</span><span class="nav-tag ent">ENT</span></div>
+    <div class="nav-item"><span class="nav-item-text">Cronologia Intent</span></div>
+    <div class="nav-item"><span class="nav-item-text">Coda Dual Approval</span><span class="nav-badge purple">1</span></div>
+  </div>
+
+  <div class="sidebar-footer">
+    <div class="avatar-sm">RT</div>
+    <div>
+      <div class="user-name-sm">Roberto Treffiletti</div>
+      <div class="user-role-sm">Super Admin</div>
+    </div>
+    <button class="btn-icon" title="Logout">⎋</button>
+  </div>
+</nav>
+
+<!-- ══════════════════════ TOPBAR ══════════════════════ -->
+<header class="topbar">
+  <div class="topbar-title">
+    Dashboard
+    <span class="topbar-breadcrumb">/ master</span>
+  </div>
+  <div class="search-field">
+    <input type="text" placeholder="Cerca utenti, sessioni, policy...">
+    <span class="search-kbd">⌘K</span>
+  </div>
+  <div class="status-dot"></div>
+  <span class="status-label">Operativo</span>
+  <div class="theme-toggle">
+    <button class="theme-btn active" onclick="setTheme('dark',this)">Scuro</button>
+    <button class="theme-btn" onclick="setTheme('light',this)">Chiaro</button>
+  </div>
+  <div class="notif-wrap">
+    <button class="topbar-btn">Notifiche<span class="notif-dot">3</span></button>
+  </div>
+  <button class="topbar-btn primary">+ Nuovo</button>
+</header>
+
+<!-- ══════════════════════ MAIN ══════════════════════ -->
+<main class="main">
+<div class="content">
+
+  <!-- ══ BEATRICE ══ -->
+  <div class="beatrice-panel">
+    <div class="beatrice-header">
+      <div>
+        <div class="beatrice-title-main">BEATRICE — Amministrazione in Linguaggio Naturale</div>
+        <div class="beatrice-subtitle">Digita un comando di configurazione, una query di analisi o una richiesta di troubleshooting in italiano o inglese</div>
+      </div>
+      <span class="beatrice-ent-tag">ENTERPRISE</span>
+    </div>
+    <div class="beatrice-body">
+      <div class="beatrice-input-row">
+        <input class="beatrice-input" type="text" placeholder='Es: "Blocca sessioni gruppo Traders" · "Quanti login falliti nelle ultime 6h?" · "Crea policy MFA per admin" · "Stato conformità DORA"'>
+        <button class="beatrice-submit">Invia</button>
+      </div>
+      <div class="beatrice-chips">
+        <span class="b-chip">Login falliti ultima ora</span>
+        <span class="b-chip">Blocca sessioni Finance</span>
+        <span class="b-chip">Stato DORA</span>
+        <span class="b-chip">Crea client OAuth2</span>
+        <span class="b-chip">Analisi anomalie 7 giorni</span>
+        <span class="b-chip">Disabilita utente</span>
+      </div>
+      <div class="beatrice-response">
+        <div class="b-resp-label">Risposta BEATRICE — Qwen2.5 7B · 38ms</div>
+        <div class="b-resp-text">
+          Nelle ultime 24 ore risultano <strong>847 login falliti</strong> su 12 indirizzi IP distinti.
+          Il 73% del traffico proviene da <code>185.220.101.x</code> — subnet classificata Tor.
+          Suggerisco blocco del range IP e attivazione rate limiting su SOGLIA Gateway.
+        </div>
+        <div class="intent-review">
+          <div class="intent-label">Conferma azione — Intent Review</div>
+          <div class="intent-text">
+            Ho interpretato: blocco IP range <strong>185.220.101.0/24</strong> su SOGLIA Gateway
+            con rate limiting <strong>10 req/min</strong> sugli endpoint di autenticazione.
+          </div>
+          <div class="intent-actions">
+            <button class="btn-confirm">Conferma</button>
+            <button class="btn-cancel">Annulla</button>
+            <button class="btn ghost" style="font-size:12px;padding:4px 10px">Modifica</button>
+            <span class="dual-tag">Dual Approval DORA</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ KPI ══ -->
+  <div class="kpi-strip">
+    <div class="kpi-card">
+      <div class="kpi-label">Utenti Totali</div>
+      <div><span class="kpi-accent" style="background:var(--accent)"></span><span class="kpi-value">247</span></div>
+      <div class="kpi-sub"><span class="up">+3</span> questa settimana · 5 realm</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Sessioni Attive</div>
+      <div><span class="kpi-accent" style="background:var(--ok)"></span><span class="kpi-value">38</span></div>
+      <div class="kpi-sub"><span class="up">+12%</span> vs ieri</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Auth Fallite 24h</div>
+      <div><span class="kpi-accent" style="background:var(--error)"></span><span class="kpi-value">847</span></div>
+      <div class="kpi-sub"><span class="down">+340%</span> vs media — anomalia</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Token Emessi 24h</div>
+      <div><span class="kpi-accent" style="background:var(--purple)"></span><span class="kpi-value">1.842</span></div>
+      <div class="kpi-sub">access: 1.207 · refresh: 635</div>
+    </div>
+  </div>
+
+  <!-- ══ TABELLA UTENTI + FEED ══ -->
+  <div class="grid-2-1">
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <div class="card-title">Gestione Utenti</div>
+          <div class="card-subtitle">247 utenti · Realm master</div>
+        </div>
+        <div class="card-actions">
+          <button class="btn ghost">Filtra</button>
+          <button class="btn primary">Nuovo Utente</button>
+        </div>
+      </div>
+      <div class="tbl-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Utente</th>
+              <th>Ruolo</th>
+              <th>Stato</th>
+              <th>MFA</th>
+              <th>Ultimo Accesso</th>
+              <th>Realm</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><div class="u-cell"><div class="u-av">RT</div><div><div class="u-name">roberto.treffiletti</div><div class="u-email">roberto@pragmia.local</div></div></div></td>
+              <td><span class="chip blue">ADMIN</span></td>
+              <td><span class="chip ok">Attivo</span></td>
+              <td><span class="chip ok">TOTP</span></td>
+              <td style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text-secondary)">Oggi 18:03</td>
+              <td><span class="chip gray">master</span></td>
+              <td><button class="btn ghost" style="padding:3px 8px;font-size:11.5px">···</button></td>
+            </tr>
+            <tr>
+              <td><div class="u-cell"><div class="u-av" style="background:var(--ok)">MR</div><div><div class="u-name">mario.rossi</div><div class="u-email">mario.rossi@corp.local</div></div></div></td>
+              <td><span class="chip gray">USER</span></td>
+              <td><span class="chip ok">Attivo</span></td>
+              <td><span class="chip gray">—</span></td>
+              <td style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text-secondary)">Oggi 14:22</td>
+              <td><span class="chip gray">corp</span></td>
+              <td><button class="btn ghost" style="padding:3px 8px;font-size:11.5px">···</button></td>
+            </tr>
+            <tr>
+              <td><div class="u-cell"><div class="u-av" style="background:var(--purple)">LV</div><div><div class="u-name">laura.verdi</div><div class="u-email">laura.verdi@corp.local</div></div></div></td>
+              <td><span class="chip purple">AUDITOR</span></td>
+              <td><span class="chip ok">Attivo</span></td>
+              <td><span class="chip ok">TOTP</span></td>
+              <td style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text-secondary)">Ieri 09:45</td>
+              <td><span class="chip gray">corp</span></td>
+              <td><button class="btn ghost" style="padding:3px 8px;font-size:11.5px">···</button></td>
+            </tr>
+            <tr>
+              <td><div class="u-cell"><div class="u-av" style="background:var(--error)">AB</div><div><div class="u-name">antonio.bianchi</div><div class="u-email">a.bianchi@corp.local</div></div></div></td>
+              <td><span class="chip gray">USER</span></td>
+              <td><span class="chip err">Bloccato</span></td>
+              <td><span class="chip gray">—</span></td>
+              <td style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text-secondary)">28 Apr 11:00</td>
+              <td><span class="chip gray">corp</span></td>
+              <td><button class="btn danger" style="padding:3px 8px;font-size:11.5px">Sblocca</button></td>
+            </tr>
+            <tr>
+              <td><div class="u-cell"><div class="u-av" style="background:var(--warn)">GF</div><div><div class="u-name">giulia.ferrari</div><div class="u-email">g.ferrari@dev.local</div></div></div></td>
+              <td><span class="chip gray">USER</span></td>
+              <td><span class="chip warn">Disabilitato</span></td>
+              <td><span class="chip gray">—</span></td>
+              <td style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text-secondary)">15 Apr 16:30</td>
+              <td><span class="chip gray">dev</span></td>
+              <td><button class="btn ghost" style="padding:3px 8px;font-size:11.5px">···</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div style="padding:9px 18px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
+        <span style="font-size:11.5px;color:var(--text-muted)">1–5 di 247 utenti</span>
+        <div style="display:flex;gap:5px">
+          <button class="btn ghost" style="padding:3px 9px">‹</button>
+          <button class="btn primary" style="padding:3px 9px">1</button>
+          <button class="btn ghost" style="padding:3px 9px">2</button>
+          <button class="btn ghost" style="padding:3px 9px">3</button>
+          <button class="btn ghost" style="padding:3px 9px">›</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <div class="card-title">Audit — Live Feed</div>
+          <div class="card-subtitle">SSE · tempo reale</div>
+        </div>
+        <div class="card-actions">
+          <span class="status-dot"></span>
+        </div>
+      </div>
+      <div class="card-body" style="padding:8px 14px">
+        <div class="feed-item">
+          <div class="feed-dot nlp"></div>
+          <div><div class="feed-msg">BEATRICE: blocco IP <span class="hl">185.220.101.0/24</span> — dual approval in attesa</div><div class="feed-sub">roberto.treffiletti · intent review</div></div>
+          <div class="feed-time">18:11</div>
+        </div>
+        <div class="feed-item">
+          <div class="feed-dot err"></div>
+          <div><div class="feed-msg">Auth ×5 → <span class="hl">antonio.bianchi</span> bloccato</div><div class="feed-sub">IP 185.220.101.47 · brute-force</div></div>
+          <div class="feed-time">18:09</div>
+        </div>
+        <div class="feed-item">
+          <div class="feed-dot ok"></div>
+          <div><div class="feed-msg">Login OK · <span class="hl">roberto.treffiletti</span> · TOTP</div><div class="feed-sub">192.168.1.10 · master · Chrome</div></div>
+          <div class="feed-time">18:03</div>
+        </div>
+        <div class="feed-item">
+          <div class="feed-dot blue"></div>
+          <div><div class="feed-msg">Token emesso → <span class="hl">app-crm</span> client_credentials</div><div class="feed-sub">scope: crm:read · TTL 900s</div></div>
+          <div class="feed-time">18:01</div>
+        </div>
+        <div class="feed-item">
+          <div class="feed-dot warn"></div>
+          <div><div class="feed-msg">Session kill bulk: <span class="hl">Gruppo Traders</span> · 47 sessioni</div><div class="feed-sub">admin: mario.rossi · BEATRICE NLP</div></div>
+          <div class="feed-time">17:55</div>
+        </div>
+        <div class="feed-item">
+          <div class="feed-dot ok"></div>
+          <div><div class="feed-msg">SP SAML registrato: <span class="hl">Azure AD corp</span></div><div class="feed-sub">entityId: sts.windows.net/{tenant}</div></div>
+          <div class="feed-time">17:40</div>
+        </div>
+        <div class="feed-item">
+          <div class="feed-dot err"></div>
+          <div><div class="feed-msg">Token revocato: <span class="hl">app-legacy</span> · RFC 7009</div><div class="feed-sub">token_type_hint: refresh_token</div></div>
+          <div class="feed-time">17:32</div>
+        </div>
+      </div>
+      <div style="padding:9px 14px;border-top:1px solid var(--border)">
+        <button class="btn ghost" style="width:100%;justify-content:center">Apri Audit Log completo</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ CANTO EDITOR ══ -->
+  <div class="canto-panel">
+    <div class="card-header" style="border-bottom:1px solid var(--border)">
+      <div>
+        <div class="card-title">CANTO — Flow Editor</div>
+        <div class="card-subtitle">Flow attivo: <strong>default-login-mfa</strong> · Drag &amp; drop nodi predefiniti o script personalizzati</div>
+      </div>
+      <div class="card-actions">
+        <button class="btn ghost">Export YAML</button>
+        <button class="btn ghost">Valida</button>
+        <button class="btn primary">Salva Flow</button>
+      </div>
+    </div>
+    <div class="canto-layout">
+
+      <!-- PALETTE -->
+      <div class="canto-palette">
+        <div class="pal-section-label">Nodi predefiniti</div>
+        <div class="pal-node"><span class="pal-node-dot" style="background:var(--ok)"></span>Start</div>
+        <div class="pal-node"><span class="pal-node-dot" style="background:var(--accent)"></span>Username / Password</div>
+        <div class="pal-node"><span class="pal-node-dot" style="background:var(--purple)"></span>TOTP MFA</div>
+        <div class="pal-node"><span class="pal-node-dot" style="background:var(--accent)"></span>LDAP Auth</div>
+        <div class="pal-node"><span class="pal-node-dot" style="background:var(--accent)"></span>OIDC / SAML SP</div>
+        <div class="pal-node"><span class="pal-node-dot" style="background:var(--warn)"></span>Condition Branch</div>
+        <div class="pal-node"><span class="pal-node-dot" style="background:var(--accent)"></span>Attributo Utente</div>
+        <div class="pal-node"><span class="pal-node-dot" style="background:var(--warn)"></span>IP / Geo Check</div>
+        <div class="pal-node"><span class="pal-node-dot" style="background:var(--warn)"></span>Time Window</div>
+        <div class="pal-node"><span class="pal-node-dot" style="background:var(--ok)"></span>Allow</div>
+        <div class="pal-node"><span class="pal-node-dot" style="background:var(--error)"></span>Deny</div>
+        <div class="pal-node"><span class="pal-node-dot" style="background:var(--accent)"></span>Redirect</div>
+        <div class="pal-node"><span class="pal-node-dot" style="background:var(--accent)"></span>Set Attributo</div>
+        <div class="pal-node"><span class="pal-node-dot" style="background:var(--accent)"></span>Webhook</div>
+        <div class="pal-node"><span class="pal-node-dot" style="background:var(--accent)"></span>Retry</div>
+        <div class="pal-section-label" style="margin-top:6px">Nodi script</div>
+        <div class="pal-node script"><span class="pal-node-dot" style="background:var(--purple)"></span>Script Node (JS)</div>
+        <div class="pal-node script"><span class="pal-node-dot" style="background:var(--purple)"></span>Groovy Node</div>
+        <div class="pal-node script"><span class="pal-node-dot" style="background:var(--purple)"></span>HTTP Callout</div>
+        <div class="pal-node script"><span class="pal-node-dot" style="background:var(--purple)"></span>Decision Script</div>
+      </div>
+
+      <!-- CANVAS -->
+      <div class="canto-canvas">
+        <svg class="canto-svg">
+          <!-- Connettori -->
+          <defs>
+            <marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#4a7fd4" opacity=".7"/>
+            </marker>
+          </defs>
+          <!-- START → UsernamePassword -->
+          <path d="M 105 60 L 175 60" stroke="#4a7fd4" stroke-width="1.5" fill="none" marker-end="url(#arr)" opacity=".7"/>
+          <!-- UsernamePassword → Condition -->
+          <path d="M 305 60 L 370 60" stroke="#4a7fd4" stroke-width="1.5" fill="none" marker-end="url(#arr)" opacity=".7"/>
+          <!-- Condition → TOTP (admin) -->
+          <path d="M 475 50 C 510 50 510 30 540 30 L 560 30" stroke="#8b6fc9" stroke-width="1.5" fill="none" stroke-dasharray="4,3" marker-end="url(#arr)" opacity=".7"/>
+          <!-- Condition → Allow (user) -->
+          <path d="M 475 70 C 510 70 510 100 540 100 L 560 100" stroke="#4caf7d" stroke-width="1.5" fill="none" marker-end="url(#arr)" opacity=".7"/>
+          <!-- TOTP → Allow -->
+          <path d="M 680 30 L 710 30 L 710 70 L 720 70" stroke="#4caf7d" stroke-width="1.5" fill="none" marker-end="url(#arr)" opacity=".7"/>
+          <!-- TOTP → Deny (fail) -->
+          <path d="M 680 30 L 710 30 L 710 140 L 720 140" stroke="#d95f5f" stroke-width="1.5" fill="none" stroke-dasharray="3,3" marker-end="url(#arr)" opacity=".6"/>
+          <!-- ScriptNode → Condition -->
+          <path d="M 240 160 L 240 90 L 370 90" stroke="#8b6fc9" stroke-width="1.5" fill="none" stroke-dasharray="4,3" marker-end="url(#arr)" opacity=".6"/>
+        </svg>
+
+        <!-- Nodi -->
+        <div class="c-node start" style="left:30px;top:40px">
+          <div class="c-node-type">Entry</div>
+          <div class="c-node-label">Start</div>
+        </div>
+        <div class="c-node auth" style="left:175px;top:38px">
+          <div class="c-node-type">Auth</div>
+          <div class="c-node-label">Username<br>Password</div>
+        </div>
+        <div class="c-node cond" style="left:370px;top:38px">
+          <div class="c-node-type">Condition</div>
+          <div class="c-node-label">Admin?</div>
+        </div>
+        <div class="c-node mfa" style="left:560px;top:14px">
+          <div class="c-node-type">MFA</div>
+          <div class="c-node-label">TOTP</div>
+        </div>
+        <div class="c-node allow" style="left:560px;top:82px">
+          <div class="c-node-type">Decision</div>
+          <div class="c-node-label">Allow</div>
+        </div>
+        <div class="c-node allow" style="left:720px;top:52px">
+          <div class="c-node-type">Decision</div>
+          <div class="c-node-label">Allow</div>
+        </div>
+        <div class="c-node deny" style="left:720px;top:122px">
+          <div class="c-node-type">Decision</div>
+          <div class="c-node-label">Deny</div>
+        </div>
+        <!-- Script node -->
+        <div class="c-node script-n" style="left:155px;top:138px">
+          <div class="c-node-type" style="color:var(--purple)">Script Node</div>
+          <div class="c-node-label" style="color:var(--purple)">Risk Score JS</div>
+          <div style="font-size:10px;color:var(--text-muted);margin-top:3px">custom · editabile</div>
+        </div>
+
+        <!-- Toolbar -->
+        <div class="canto-toolbar">
+          <button class="c-tool-btn">+ Zoom</button>
+          <button class="c-tool-btn">− Zoom</button>
+          <button class="c-tool-btn">Reset</button>
+          <button class="c-tool-btn">Anteprima</button>
+        </div>
+
+        <!-- Label connettori -->
+        <div style="position:absolute;left:488px;top:16px;font-size:10px;color:var(--purple)">admin=true</div>
+        <div style="position:absolute;left:488px;top:74px;font-size:10px;color:var(--ok)">admin=false</div>
+        <div style="position:absolute;left:689px;top:46px;font-size:10px;color:var(--ok)">success</div>
+        <div style="position:absolute;left:689px;top:116px;font-size:10px;color:var(--error)">fail</div>
+      </div>
+
+      <!-- INSPECTOR -->
+      <div class="canto-inspector">
+        <div class="insp-title">Inspector</div>
+
+        <div style="font-size:12px;font-weight:600;color:var(--purple);margin-bottom:10px;padding:6px 8px;background:rgba(139,111,201,.08);border:1px solid rgba(139,111,201,.2);border-radius:4px">
+          Script Node — Risk Score JS
+        </div>
+
+        <div class="insp-field">
+          <div class="insp-label">Nome nodo</div>
+          <input class="insp-input" value="Risk Score JS">
+        </div>
+
+        <div class="insp-field">
+          <div class="insp-label">Tipo</div>
+          <select class="insp-select">
+            <option>Script Node (JavaScript)</option>
+            <option>Groovy Node</option>
+            <option>HTTP Callout</option>
+            <option>Decision Script</option>
+          </select>
+        </div>
+
+        <hr class="insp-divider">
+
+        <div class="insp-field">
+          <div class="insp-script-label">Script (JavaScript)</div>
+          <textarea class="insp-textarea">var ip = nodeState.get("clientIp");
+var risk = checkRiskScore(ip);
+if (risk > 0.8) {
+  action.goTo("deny");
+} else {
+  action.goTo("next");
+}</textarea>
+        </div>
+
+        <div class="insp-field">
+          <div class="insp-label">Output connectors</div>
+          <input class="insp-input" value="next, deny">
+        </div>
+
+        <div class="insp-field">
+          <div class="insp-label">Timeout (ms)</div>
+          <input class="insp-input" type="number" value="3000">
+        </div>
+
+        <hr class="insp-divider">
+        <button class="btn primary" style="width:100%;justify-content:center;font-size:12.5px">Applica</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ COMPLIANCE + TOKEN STATS + MODULI ══ -->
+  <div class="grid-3">
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <div class="card-title">Compliance — LUCE</div>
+          <div class="card-subtitle">Gap analysis in tempo reale</div>
+        </div>
+        <div class="card-actions"><span class="nav-tag ent">ENT</span></div>
+      </div>
+      <div class="card-body">
+        <div class="comp-row">
+          <div class="comp-name" style="color:var(--error)">DORA</div>
+          <div class="comp-track"><div class="comp-fill" style="width:78%;background:var(--warn)"></div></div>
+          <div class="comp-pct" style="color:var(--warn)">78%</div>
+          <div class="comp-chg" style="color:var(--ok);font-size:11px">+5%</div>
+        </div>
+        <div class="comp-row">
+          <div class="comp-name" style="color:var(--warn)">NIS2</div>
+          <div class="comp-track"><div class="comp-fill" style="width:85%;background:var(--ok)"></div></div>
+          <div class="comp-pct" style="color:var(--ok)">85%</div>
+          <div class="comp-chg" style="color:var(--ok);font-size:11px">+3%</div>
+        </div>
+        <div class="comp-row">
+          <div class="comp-name" style="color:var(--ok)">GDPR</div>
+          <div class="comp-track"><div class="comp-fill" style="width:92%;background:var(--ok)"></div></div>
+          <div class="comp-pct" style="color:var(--ok)">92%</div>
+          <div class="comp-chg" style="color:var(--text-muted);font-size:11px">0%</div>
+        </div>
+        <div class="comp-row">
+          <div class="comp-name" style="color:var(--accent)">AgID</div>
+          <div class="comp-track"><div class="comp-fill" style="width:71%;background:var(--accent)"></div></div>
+          <div class="comp-pct" style="color:var(--accent)">71%</div>
+          <div class="comp-chg" style="color:var(--error);font-size:11px">-2%</div>
+        </div>
+        <div style="margin-top:12px">
+          <button class="btn ghost" style="width:100%;justify-content:center">Gap Analysis dettagliata</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <div class="card-title">Token e OAuth2</div>
+          <div class="card-subtitle">Ultime 24 ore</div>
+        </div>
+      </div>
+      <div class="card-body" style="padding:10px 18px">
+        <div style="display:flex;flex-direction:column;gap:0">
+          <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border-soft);font-size:12.5px"><span style="color:var(--text-secondary)">Access Token emessi</span><span style="font-family:'JetBrains Mono',monospace;font-weight:600">1.207</span></div>
+          <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border-soft);font-size:12.5px"><span style="color:var(--text-secondary)">Refresh Token emessi</span><span style="font-family:'JetBrains Mono',monospace;font-weight:600">635</span></div>
+          <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border-soft);font-size:12.5px"><span style="color:var(--text-secondary)">Token revocati RFC 7009</span><span style="font-family:'JetBrains Mono',monospace;font-weight:600;color:var(--error)">18</span></div>
+          <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border-soft);font-size:12.5px"><span style="color:var(--text-secondary)">Introspection calls</span><span style="font-family:'JetBrains Mono',monospace;font-weight:600">4.832</span></div>
+          <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border-soft);font-size:12.5px"><span style="color:var(--text-secondary)">Client attivi ora</span><span style="font-family:'JetBrains Mono',monospace;font-weight:600;color:var(--ok)">9 / 12</span></div>
+          <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border-soft);font-size:12.5px"><span style="color:var(--text-secondary)">Blacklist Redis</span><span style="font-family:'JetBrains Mono',monospace;font-weight:600;color:var(--warn)">18</span></div>
+          <div style="display:flex;justify-content:space-between;padding:8px 0;font-size:12.5px"><span style="color:var(--text-secondary)">Assertion SAML emesse</span><span style="font-family:'JetBrains Mono',monospace;font-weight:600">342</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <div class="card-title">Moduli PRAGMIA</div>
+          <div class="card-subtitle">Stato runtime e licenza</div>
+        </div>
+      </div>
+      <div class="card-body" style="padding:12px 14px">
+        <div class="mod-grid">
+          <div class="mod-item"><div class="mod-dot" style="background:var(--ok)"></div><div class="mod-name">VIRGILIO <span class="mod-tier">Core</span></div><div class="mod-state" style="color:var(--ok)">ON</div></div>
+          <div class="mod-item"><div class="mod-dot" style="background:var(--ok)"></div><div class="mod-name">CANTO <span class="mod-tier">Core</span></div><div class="mod-state" style="color:var(--ok)">ON</div></div>
+          <div class="mod-item"><div class="mod-dot" style="background:var(--ok)"></div><div class="mod-name">SOGLIA <span class="mod-tier">Core</span></div><div class="mod-state" style="color:var(--ok)">ON</div></div>
+          <div class="mod-item"><div class="mod-dot" style="background:var(--ok)"></div><div class="mod-name">CLIO <span class="mod-tier">Core</span></div><div class="mod-state" style="color:var(--ok)">ON</div></div>
+          <div class="mod-item"><div class="mod-dot" style="background:var(--purple)"></div><div class="mod-name">BEATRICE <span class="mod-tier">Ent</span></div><div class="mod-state" style="color:var(--purple)">ON</div></div>
+          <div class="mod-item"><div class="mod-dot" style="background:var(--border)"></div><div class="mod-name">MINOS <span class="mod-tier">Ent</span></div><div class="mod-state" style="color:var(--text-muted)">OFF</div></div>
+          <div class="mod-item"><div class="mod-dot" style="background:var(--border)"></div><div class="mod-name">LUCE <span class="mod-tier">Ent</span></div><div class="mod-state" style="color:var(--text-muted)">OFF</div></div>
+          <div class="mod-item"><div class="mod-dot" style="background:var(--border)"></div><div class="mod-name">SIBILLA <span class="mod-tier">Road</span></div><div class="mod-state" style="color:var(--text-muted)">—</div></div>
+        </div>
+        <div style="margin-top:10px;padding:9px 11px;background:var(--bg-elevated);border:1px solid var(--border);border-radius:4px">
+          <div style="font-size:10.5px;color:var(--text-muted)">Licenza</div>
+          <div style="font-size:13px;font-weight:700;color:var(--purple)">Enterprise Medium</div>
+          <div style="font-size:11px;color:var(--text-muted)">Scadenza 01 Mag 2027 · 3 nodi · 500k utenti</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <span>PRAGMIA v1.0.0-SNAPSHOT · Java 21 · Spring Boot 3.3 · PostgreSQL 16 · Redis 7</span>
+    <span>© 2026 Roberto Treffiletti</span>
+  </div>
+
+</div>
+</main>
+</div>
+
+<script>
+function setTheme(theme, btn) {
+  document.documentElement.setAttribute('data-theme', theme);
+  document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+</script>
+</body>
+</html>
