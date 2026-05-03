@@ -1,103 +1,128 @@
 package io.pragmia.virgilio.access.service;
 
-import io.pragmia.virgilio.user.model.VirgilioUser;
+import io.pragmia.virgilio.access.model.LoginContext;
+import io.pragmia.virgilio.access.model.RiskFactor;
+import io.pragmia.virgilio.access.model.RiskProfile;
+import io.pragmia.virgilio.access.repository.RiskFactorRepository;
+import io.pragmia.virgilio.access.repository.RiskProfileRepository;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.time.Instant;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.*;
 
 @Service
 @RequiredArgsConstructor
-@Slf4j
 public class RiskEngine {
 
-    private final io.pragmia.virgilio.access.repository.RiskFactorRepository factorRepo;
-    private final io.pragmia.virgilio.access.repository.RiskProfileRepository profileRepo;
-    private final io.pragmia.virgilio.access.repository.LoginContextRepository contextRepo;
+    private final RiskFactorRepository riskFactorRepository;
+    private final RiskProfileRepository riskProfileRepository;
 
-    public RiskAssessment assess(VirgilioUser user, String ipAddress, String userAgent,
-                                  String geoCountry, String deviceFingerprint, Instant loginTime) {
-        Map<String, Integer> scores = new HashMap<>();
-        int totalScore = 0;
-        List<RiskFactor> factors = factorRepo.findAll();
+    // Risk evaluation logic
+    public int evaluateRisk(LoginContext context) {
+        int totalRisk = 0;
 
-        for (RiskFactor factor : factors) {
-            if (!factor.isEnabled()) continue;
-            int score = evaluateFactor(factor, user, ipAddress, userAgent, geoCountry, deviceFingerprint, loginTime);
-            scores.put(factor.getName(), score);
-            totalScore += score * factor.getWeight();
+        // 1. Geographic risk (location anomaly)
+        totalRisk += evaluateGeographicRisk(context);
+
+        // 2. IP reputation risk
+        totalRisk += evaluateIpRisk(context);
+
+        // 3. Device fingerprint risk
+        totalRisk += evaluateDeviceRisk(context);
+
+        // 4. Velocity risk (multiple attempts)
+        totalRisk += evaluateVelocityRisk(context);
+
+        // 5. Time-based risk (unusual login time)
+        totalRisk += evaluateTimeRisk(context);
+
+        return Math.min(totalRisk, 100);
+    }
+
+    private int evaluateGeographicRisk(LoginContext context) {
+        // Check if user's location is different from usual
+        // Implementation would use geolocation database
+        return 0; // Placeholder
+    }
+
+    private int evaluateIpRisk(LoginContext context) {
+        // Check IP reputation
+        // Implementation would use IP reputation service
+        return 0; // Placeholder
+    }
+
+    private int evaluateDeviceRisk(LoginContext context) {
+        // Check device fingerprint
+        if (context.getDeviceFingerprint() == null) {
+            return 20; // Unknown device is riskier
         }
-
-        int normalizedScore = Math.min(100, totalScore / Math.max(1, factors.size()));
-        RiskProfile profile = profileRepo.findFirstByIsDefaultTrue()
-            .orElseGet(() -> { RiskProfile p = new RiskProfile(); p.setName("Default"); p.setRiskThreshold(50); return p; });
-
-        String decision = normalizedScore <= profile.getRiskThreshold() ? "ALLOW" : "BLOCK";
-        boolean requiresMfa = normalizedScore > 20 && normalizedScore <= profile.getRiskThreshold();
-        if (requiresMfa) decision = "MFA_STEPUP";
-
-        log.info("RiskEngine: user={} ip={} score={}/100 decision={}", user.getUsername(), ipAddress, normalizedScore, decision);
-        return new RiskAssessment(normalizedScore, scores, decision, false);
+        return 0;
     }
 
-    private int evaluateFactor(RiskFactor factor, VirgilioUser user, String ipAddress,
-                                String userAgent, String geoCountry, String deviceFingerprint,
-                                Instant loginTime) {
-        return switch (factor.getName()) {
-            case "GEO" -> evaluateGeo(factor, geoCountry);
-            case "IP_REPUTATION" -> evaluateIpFactor(factor, ipAddress);
-            case "DEVICE_FINGERPRINT" -> evaluateDevice(factor, deviceFingerprint);
-            case "VELOCITY" -> evaluateVelocity(factor, user.getUsername());
-            case "TIME_OF_DAY" -> evaluateTime(factor, loginTime);
-            default -> 0;
-        };
+    private int evaluateVelocityRisk(LoginContext context) {
+        // Check login velocity (multiple attempts in short time)
+        // Implementation would track login attempts
+        return 0; // Placeholder
     }
 
-    private int evaluateGeo(RiskFactor factor, String geoCountry) {
-        if (geoCountry == null) return factor.getWeight();
-        return "IT".equals(geoCountry.toUpperCase()) ? 0 : factor.getWeight() / 2;
+    private int evaluateTimeRisk(LoginContext context) {
+        // Check if login time is unusual
+        LocalTime loginTime = context.getLoginTime().atZone(ZoneId.systemDefault()).toLocalTime();
+        if (loginTime.isBefore(LocalTime.of(6, 0)) || loginTime.isAfter(LocalTime.of(23, 0))) {
+            return 10; // Unusual time
+        }
+        return 0;
     }
 
-    private int evaluateIpFactor(RiskFactor factor, String ipAddress) {
-        if (ipAddress == null) return factor.getWeight();
-        return ipAddress.startsWith("10.") || ipAddress.startsWith("192.168.") ? 0 : factor.getWeight() / 4;
+    // RiskFactor CRUD operations
+    public List<RiskFactor> getAllRiskFactors() {
+        return riskFactorRepository.findAll();
     }
 
-    private int evaluateDevice(RiskFactor factor, String deviceFingerprint) {
-        return deviceFingerprint != null && !deviceFingerprint.isBlank() ? 0 : factor.getWeight();
+    public Optional<RiskFactor> getRiskFactorById(UUID id) {
+        return riskFactorRepository.findById(id);
     }
 
-    private int evaluateVelocity(RiskFactor factor, String username) {
-        long attemptsLast5min = contextRepo.countByUsernameAndLoginTimestampAfter(username, Instant.now().minusSeconds(300));
-        return attemptsLast5min > 5 ? factor.getWeight() : (int) (factor.getWeight() * attemptsLast5min / 10.0);
+    public RiskFactor createRiskFactor(RiskFactor riskFactor) {
+        return riskFactorRepository.save(riskFactor);
     }
 
-    private int evaluateTime(RiskFactor factor, Instant loginTime) {
-        LocalTime local = LocalTime.now(ZoneId.systemDefault());
-        int hour = local.getHour();
-        return (hour < 6 || hour > 23) ? factor.getWeight() / 2 : 0;
+    public Optional<RiskFactor> updateRiskFactor(UUID id, RiskFactor riskFactor) {
+        if (!riskFactorRepository.existsById(id)) {
+            return Optional.empty();
+        }
+        riskFactor.setId(id);
+        return Optional.of(riskFactorRepository.save(riskFactor));
     }
 
-    public record RiskAssessment(int score, Map<String, Integer> factors, String decision, boolean mfaRequired) {}
-}
+    public void deleteRiskFactor(UUID id) {
+        riskFactorRepository.deleteById(id);
+    }
 
-interface RiskFactorRepository {
-    List<RiskFactor> findAll();
-    Optional<RiskFactor> findById(UUID id);
-    void save(RiskFactor factor);
-}
+    // RiskProfile CRUD operations
+    public List<RiskProfile> getAllRiskProfiles() {
+        return riskProfileRepository.findAll();
+    }
 
-interface RiskProfileRepository {
-    Optional<RiskProfile> findFirstByIsDefaultTrue();
-    Optional<RiskProfile> findById(UUID id);
-    void save(RiskProfile profile);
-}
+    public Optional<RiskProfile> getRiskProfileById(UUID id) {
+        return riskProfileRepository.findById(id);
+    }
 
-interface LoginContextRepository {
-    long countByUsernameAndLoginTimestampAfter(String username, Instant after);
-    void save(io.pragmia.virgilio.access.model.LoginContext context);
+    public RiskProfile createRiskProfile(RiskProfile riskProfile) {
+        return riskProfileRepository.save(riskProfile);
+    }
+
+    public Optional<RiskProfile> updateRiskProfile(UUID id, RiskProfile riskProfile) {
+        if (!riskProfileRepository.existsById(id)) {
+            return Optional.empty();
+        }
+        riskProfile.setId(id);
+        return Optional.of(riskProfileRepository.save(riskProfile));
+    }
+
+    public void deleteRiskProfile(UUID id) {
+        riskProfileRepository.deleteById(id);
+    }
 }
